@@ -1,0 +1,111 @@
+﻿using FluentValidation;
+using Hospital.Application.DTOs.UserInfo;
+using Hospital.Application.Interfaces;
+using Hospital.Application.Models;
+using Hospital.Domain.Aggregates.UserInfo;
+using Mapster;
+
+namespace Hospital.Application.Services
+{
+    public class UserInfoService : IUserInfoService
+    {
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IUserInfoRepository _userInfoRepository;
+        private readonly IValidator<CreateUpdateUserInfoDTO> _validator;
+        public UserInfoService(
+            ICurrentUserService currentUserService,
+            IUserInfoRepository userInfoRepository,
+            IValidator<CreateUpdateUserInfoDTO> validator
+            )
+        {
+            _currentUserService = currentUserService;
+            _userInfoRepository = userInfoRepository;
+            _validator = validator;
+        }
+        public async Task<ServiceResult<UserInfoDTO>> Create(CreateUpdateUserInfoDTO createUserInfoDTO)
+        {
+            var validationResult = _validator.Validate(createUserInfoDTO);
+            if (!validationResult.IsValid)
+                return ServiceResult<UserInfoDTO>.FromValidationResult(validationResult);
+
+            if ((_currentUserService.UserId ?? 0) <= 0)
+                return ServiceResult<UserInfoDTO>.Unauthorized();
+
+            var userInfo = new UserInfo(
+                createUserInfoDTO.Email,
+                createUserInfoDTO.FirstName,
+                createUserInfoDTO.MiddleName,
+                createUserInfoDTO.LastName,
+                createUserInfoDTO.PhoneNumber,
+                createUserInfoDTO.Gender,
+                new Address(createUserInfoDTO.Street, createUserInfoDTO.City, createUserInfoDTO.State, createUserInfoDTO.Country),
+                createUserInfoDTO.DateOfBirth,
+                _currentUserService.UserId.Value
+                );
+
+            _userInfoRepository.Add(userInfo);
+
+            var isSuccess = await _userInfoRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<UserInfoDTO>.Created(userInfo.Adapt<UserInfoDTO>())
+                : ServiceResult<UserInfoDTO>.Failure("Failed to add user info.");
+        }
+
+        public async Task<ServiceResult<UserInfoDTO>> Delete(int id)
+        {
+            if ((_currentUserService.UserId ?? 0) <= 0)
+                return ServiceResult<UserInfoDTO>.Unauthorized();
+
+            var userInfo = await _userInfoRepository.GetById(id);
+            if (userInfo == null)
+                return ServiceResult<UserInfoDTO>.NotFound();
+
+            _userInfoRepository.Delete(userInfo);
+            var isSuccess = await _userInfoRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<UserInfoDTO>.Success(default!)
+                : ServiceResult<UserInfoDTO>.Failure("Failed to delete user info.");
+        }
+
+        public async Task<ServiceResult<UserInfoDTO>> Get(int id)
+        {
+            var userInfo = await _userInfoRepository.GetById(id);
+            if (userInfo == null)
+                return ServiceResult<UserInfoDTO>.NotFound();
+
+            return ServiceResult<UserInfoDTO>
+                .Success(userInfo.Adapt<UserInfoDTO>());
+        }
+
+        public async Task<ServiceResult<IEnumerable<UserInfoDTO>>> GetAll()
+        {
+            var userInfos = await _userInfoRepository.GetAll();
+            return ServiceResult<IEnumerable<UserInfoDTO>>
+                .Success(userInfos.Adapt<IEnumerable<UserInfoDTO>>());
+        }
+
+        public async Task<ServiceResult<UserInfoDTO>> Update(int userId, CreateUpdateUserInfoDTO userInfoDTO)
+        {
+            if ((_currentUserService.UserId ?? 0) <= 0)
+                return ServiceResult<UserInfoDTO>.Unauthorized();
+
+            var userInfo = await _userInfoRepository.GetById(userId);
+            if (userInfo == null)
+                return ServiceResult<UserInfoDTO>.NotFound();
+
+            userInfo.Update(
+                userInfoDTO.FirstName,
+                userInfoDTO.MiddleName,
+                userInfoDTO.LastName,
+                userInfoDTO.PhoneNumber,
+                userInfoDTO.Gender,
+                new Address(userInfoDTO.Street, userInfoDTO.City, userInfoDTO.State, userInfoDTO.Country),
+                userInfoDTO.DateOfBirth,
+                _currentUserService.UserId.Value
+                );
+
+            _userInfoRepository.Update(userInfo);
+            var isSuccess = await _userInfoRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<UserInfoDTO>.Success(userInfo.Adapt<UserInfoDTO>()) :
+                ServiceResult<UserInfoDTO>.Failure("Failed to update user info.");
+        }
+    }
+}
