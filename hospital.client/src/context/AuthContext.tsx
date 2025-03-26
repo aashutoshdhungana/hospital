@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useEffect, useState, ReactNode } from "react";
 import { UserInfo } from "../types/UserInfo";
 import { AuthContextType } from "../types/AuthContextType";
 import { LoginCredentials } from "../types/LoginCredentials";
@@ -19,13 +19,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 		const checkAuth = async () => {
 			try {
 				const response = await api.get<AuthResponse>("/api/login/checkauth");
-				if (response.data) {
+				if (response.data && response.data.userInfo) {
 					setUser(response.data.userInfo);
-					setPermissions([...response.data.permissions]);
-					setRoles([...response.data.roles]);
+					setPermissions(response.data.permissions || []);
+					setRoles(response.data.roles || []);
 					setIsAuthenticated(true);
+				} else {
+					// If response is successful but no user data, treat as not authenticated
+					setIsAuthenticated(false);
+					setUser(null);
 				}
 			} catch (error) {
+				console.error("Authentication check failed:", error);
 				setUser(null);
 				setPermissions([]);
 				setRoles([]);
@@ -40,16 +45,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 	const login = async (credentials: LoginCredentials) => {
 		try {
-			const response = await api.post<AuthResponse>("/api/login", credentials);
-			setUser(response.data.userInfo);
-			setPermissions(response.data.permissions);
-			setRoles(response.data.roles);
-			setIsAuthenticated(true);
+			// Ensure the credentials match the expected format on the server
+			const loginData = {
+				username: credentials.username,
+				password: credentials.password,
+				rememberMe: credentials.rememberMe || false
+			};
+			
+			console.log("Attempting login with:", { username: loginData.username, rememberMe: loginData.rememberMe });
+			
+			const response = await api.post<AuthResponse>("/api/login", loginData);
+			
+			if (response.data && response.data.userInfo) {
+				setUser(response.data.userInfo);
+				setPermissions(response.data.permissions || []);
+				setRoles(response.data.roles || []);
+				setIsAuthenticated(true);
+				return true;
+			} else {
+				throw new Error("Invalid response from server");
+			}
 		} catch (error) {
+			console.error("Login failed:", error);
 			setUser(null);
 			setPermissions([]);
 			setRoles([]);
 			setIsAuthenticated(false);
+			throw error; // Re-throw to handle in the UI
 		}
 	};
 
@@ -68,9 +90,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
-// Custom hook for authentication
-export const useAuth = (): AuthContextType => {
-	const context = useContext(AuthContext);
-	if (!context) throw new Error("useAuth must be used within an AuthProvider");
-	return context;
-};
+export default AuthContext;
