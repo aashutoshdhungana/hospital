@@ -42,8 +42,9 @@ namespace Hospital.Application.Services
 
         public async Task<IEnumerable<PatientInfoDTO>> GetPatientList()
         {
-            return (await _patientRepository.GetAll())
+            var patientList = (await _patientRepository.GetAll())
                 .Adapt<IEnumerable<PatientInfoDTO>>();
+            return patientList;
         }
 
         public async Task<ServiceResult<PatientInfoDTO>> RegisterPatient(CreatePatientDTO createPatientDTO)
