@@ -62,6 +62,11 @@ export default defineConfig({
                 target,
                 secure: false,
                 changeOrigin: true
+            },
+            '^/hello/*': {
+                target,
+                secure: false,
+                changeOrigin: true
             }
         },
         port: parseInt(env.DEV_SERVER_PORT || '58493'),

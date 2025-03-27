@@ -12,15 +12,16 @@ import {
   PopoverTrigger,
 } from "./popover";
 
-interface DateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DateRangePickerProps extends React.HTMLAttributes<HTMLElement> {
   value?: DateRange;
-  onChange?: (date: DateRange | undefined) => void;
+  onDateValueChanged?: (date: DateRange | undefined) => void;
+  //onChange?: (date: DateRange | undefined) => void;
 }
 
 export function DateRangePicker({
   className,
   value,
-  onChange,
+  onDateValueChanged,
 }: DateRangePickerProps) {
   const [date, setDate] = React.useState<DateRange | undefined>(value);
 
@@ -65,7 +66,7 @@ export function DateRangePicker({
             selected={date}
             onSelect={(newDate) => {
               setDate(newDate);
-              onChange?.(newDate);
+              onDateValueChanged?.(newDate);
             }}
             numberOfMonths={2}
           />

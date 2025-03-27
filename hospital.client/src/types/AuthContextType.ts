@@ -6,5 +6,5 @@ export interface AuthContextType {
     user: UserInfo | null;
     permissions: string[];
     roles: string[];
-    login: (credentials: LoginCredentials) => Promise<void>;
+    login: (credentials: LoginCredentials) => Promise<boolean>;
 }

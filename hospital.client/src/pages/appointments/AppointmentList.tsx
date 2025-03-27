@@ -175,7 +175,7 @@ const AppointmentList = () => {
               <div className="w-full flex-1 mr-2">
                 <DateRangePicker
                   value={dateRange}
-                  onChange={(range) => {
+                  onDateValueChanged={(range) => {
                     setDateRange(
                       range ? { from: range.from!, to: range.to! } : undefined
                     );
