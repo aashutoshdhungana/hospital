@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, FileText, Settings, Bell, Pill, Activity, User, ChevronDown, LogOut, UserCog, ClipboardList, Stethoscope, Microscope, HeartPulse } from 'lucide-react';
+import { User, ChevronDown, LogOut, UserCog, HeartPulse } from 'lucide-react';
+import sideBarItems from '../../configs/sidebarItems';
 
 import {
   Sidebar as UISidebar,
@@ -16,7 +17,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-} from './ui/sidebar';
+} from '../ui/sidebar';
 
 import {
   DropdownMenu,
@@ -25,60 +26,26 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { useAuth } from "../hooks/useAuth";
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+} from '../ui/dropdown-menu';
+import { useAuth } from "../../hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 const Sidebar = () => {
   const location = useLocation();
-  const { user, roles } = useAuth();
+  const { user, roles, permissions, activeRole, setActiveRole, logOut } = useAuth();
 
-  const menuItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { 
-      path: '/appointments', 
-      label: 'Appointments', 
-      icon: Calendar,
-      submenu: [
-        { path: '/appointments/list', label: 'All appointments' },
-        { path: '/appointments/create', label: 'Create' },
-       
-      ]
-    },
-    { 
-      path: '/patients', 
-      label: 'Patients', 
-      icon: Users,
-      submenu: [
-        { path: '/patients/list', label: 'All Patients' },
-        { path: '/patients/new', label: 'Create' },
-        
-      ]
-    },
-    { path: '/medical-records', label: 'Medical Records', icon: FileText },
-    { 
-      path: '/prescriptions', 
-      label: 'Prescriptions', 
-      icon: Pill,
-      submenu: [
-        { path: '/prescriptions/new', label: 'New Prescription' },
-        { path: '/prescriptions/active', label: 'Active Prescriptions' },
-        { path: '/prescriptions/history', label: 'Prescription History' },
-      ]
-    },
-    { path: '/vitals', label: 'Vitals', icon: Activity },
-    { path: '/notifications', label: 'Notifications', icon: Bell, badge: '5' },
-    { path: '/settings', label: 'Settings', icon: Settings },
-  ];
+  const hasPermission = (requiredPermission: string) => {
+    return (permissions && permissions.includes(requiredPermission)) || activeRole === 'Admin';
+  }
 
-  // Additional menu items based on role
-  const doctorItems = [
-    { path: '/doctor/patients', label: 'My Patients', icon: Stethoscope },
-    { path: '/doctor/rounds', label: 'Rounds', icon: ClipboardList },
-    { path: '/doctor/lab-results', label: 'Lab Results', icon: Microscope },
-  ];
+  const filteredSidebarItems = sideBarItems.filter(item => {
+    if (item.permission) {
+      return hasPermission(item.permission);
+    }
+    return true;
+  })
 
   return (
     <UISidebar collapsible="icon">
@@ -95,7 +62,7 @@ const Sidebar = () => {
           <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {filteredSidebarItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   {item.submenu ? (
                     <Collapsible className="w-full">
@@ -103,18 +70,13 @@ const Sidebar = () => {
                         <SidebarMenuButton tooltip={item.label}>
                           <item.icon className="h-4 w-4" />
                           <span>{item.label}</span>
-                          {item.badge && (
-                            <Badge variant="secondary" className="ml-auto mr-2">
-                              {/* {item.badge} */}
-                            </Badge>
-                          )}
                           <ChevronDown className="ml-auto h-4 w-4" />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
                           {item.submenu.map((subItem) => (
-                            <SidebarMenuSubItem key={subItem.path}>
+                            (!subItem.permission || hasPermission(subItem.permission)) && <SidebarMenuSubItem key={subItem.path}>
                               <SidebarMenuSubButton asChild isActive={location.pathname === subItem.path}>
                                 <Link to={subItem.path}>{subItem.label}</Link>
                               </SidebarMenuSubButton>
@@ -128,32 +90,9 @@ const Sidebar = () => {
                       <Link to={item.path}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
-                        {item.badge && (
-                          <Badge variant="secondary" className="ml-auto">
-                            {item.badge}
-                          </Badge>
-                        )}
                       </Link>
                     </SidebarMenuButton>
                   )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Doctor Tools</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {doctorItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.path} tooltip={item.label}>
-                    <Link to={item.path}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -168,19 +107,19 @@ const Sidebar = () => {
                 <SidebarMenuButton className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
                   <Avatar className="h-6 w-6 mr-2">
                     <AvatarImage src=""
-                    // {user?.avatar} 
-                    alt={user?.firstName} />
-                    <AvatarFallback>{user?.firstName}</AvatarFallback>
+                      // {user?.avatar} 
+                      alt={user?.firstName} />
+                    <AvatarFallback>{user?.firstName?.[0] || ''}{user?.lastName?.[0] || ''}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start">
                     <span>
-                    {user?.firstName}
+                      {user?.firstName}
                     </span>
                     <span className="text-xs text-muted-foreground"> {roles.map(role => (
-                <div key={role} className="role-badge">
-                  {role}
-                </div>
-              ))}</span>
+                      <div key={role} className="role-badge">
+                        {role}
+                      </div>
+                    ))}</span>
                   </div>
                   <ChevronDown className="ml-auto h-4 w-4" />
                 </SidebarMenuButton>
@@ -196,25 +135,17 @@ const Sidebar = () => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
-                <DropdownMenuItem className="bg-accent">
-                  <UserCog className="mr-2 h-4 w-4" />
-                  <span>Doctor</span>
-                  <Badge variant="outline" className="ml-auto">
-                    Active
-                  </Badge>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/receptionist/dashboard">
+                {roles.map((role) => (<>
+                  <DropdownMenuItem className="bg-accent" onClick={() => setActiveRole(role)} key={`${role}-selection`}>
                     <UserCog className="mr-2 h-4 w-4" />
-                    <span>Receptionist</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <UserCog className="mr-2 h-4 w-4" />
-                  <span>Admin</span>
-                </DropdownMenuItem>
+                    <span>{role}</span>
+                    {activeRole === role && <Badge variant="outline" className="ml-auto">
+                      Active
+                    </Badge>}
+                  </DropdownMenuItem>
+                </>))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => logOut()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

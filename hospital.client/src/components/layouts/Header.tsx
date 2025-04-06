@@ -1,10 +1,9 @@
-import { Bell, Search, User, MessageSquare, Calendar, FileText } from 'lucide-react';
-import ThemeSwitch from './ThemeSwitch';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { SidebarTrigger } from './ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Badge } from './ui/badge';
+import { Bell, User, MessageSquare, Calendar, FileText } from 'lucide-react';
+import ThemeSwitch from '../ThemeSwitch';
+import { Button } from '../ui/button';
+import { SidebarTrigger } from '../ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Badge } from '../ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,23 +11,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from '../ui/dropdown-menu';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from './ui/popover';
-import { useAuth } from "../hooks/useAuth";
+} from '../ui/popover';
+import { useAuth } from "../../hooks/useAuth";
 const Header = () => {
   // Mock user data
-  const { user, roles } = useAuth();
+  const { user, activeRole, logOut } = useAuth();
 
-  const notifications = [
-    { id: 1, title: 'New appointment', message: 'You have a new appointment at 2:00 PM', time: '10 min ago', type: 'appointment' },
-    { id: 2, title: 'Lab results ready', message: 'Patient John Doe lab results are ready', time: '1 hour ago', type: 'lab' },
-    { id: 3, title: 'Meeting reminder', message: 'Staff meeting in 30 minutes', time: '25 min ago', type: 'meeting' },
-    { id: 4, title: 'New message', message: 'Dr. Smith sent you a message', time: '2 hours ago', type: 'message' },
-  ];
+  // const notifications = [
+  //   { id: 1, title: 'New appointment', message: 'You have a new appointment at 2:00 PM', time: '10 min ago', type: 'appointment' },
+  //   { id: 2, title: 'Lab results ready', message: 'Patient John Doe lab results are ready', time: '1 hour ago', type: 'lab' },
+  //   { id: 3, title: 'Meeting reminder', message: 'Staff meeting in 30 minutes', time: '25 min ago', type: 'meeting' },
+  //   { id: 4, title: 'New message', message: 'Dr. Smith sent you a message', time: '2 hours ago', type: 'message' },
+  // ];
 
 
 
@@ -54,16 +53,12 @@ const Header = () => {
         <div className="hidden md:block">
           <h1 className="text-xl font-semibold">Hospital Management</h1>
           <p className="text-sm text-muted-foreground">
-          {roles.map(role => (
-                <div key={role} className="role-badge">
-                  {role}
-                </div>
-              ))}
+            {activeRole}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-1 justify-center px-4 md:px-6 lg:px-8">
+      {/* <div className="flex flex-1 justify-center px-4 md:px-6 lg:px-8">
         <div className="relative hidden w-full max-w-md md:block">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -72,7 +67,7 @@ const Header = () => {
             className="w-full pl-8 md:w-[300px] lg:w-[400px]"
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="flex items-center gap-2 md:gap-4">
         <Popover>
@@ -80,7 +75,8 @@ const Header = () => {
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                {notifications.length}
+                {/* {notifications.length} */}
+                0
               </Badge>
             </Button>
           </PopoverTrigger>
@@ -88,11 +84,23 @@ const Header = () => {
             <div className="p-4 border-b">
               <div className="font-medium">Notifications</div>
               <div className="text-xs text-muted-foreground">
-                You have {notifications.length} unread messages
+                {/* You have {notifications.length} unread messages */}
+                You have 0 unread messages
               </div>
             </div>
             <div className="max-h-80 overflow-auto">
-              {notifications.map((notification) => (
+              <div
+                key={1}
+                className="flex items-start gap-3 p-4 hover:bg-muted/50 cursor-pointer border-b last:border-0"
+              >
+                <div className="mt-1">{getNotificationIcon('message')}</div>
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium leading-none">Notifications Comming Soon</p>
+                  <p className="text-sm text-muted-foreground">You have no notifications</p>
+                  <p className="text-xs text-muted-foreground">No new notifications</p>
+                </div>
+              </div>
+              {/* {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
                   className="flex items-start gap-3 p-4 hover:bg-muted/50 cursor-pointer border-b last:border-0"
@@ -104,7 +112,7 @@ const Header = () => {
                     <p className="text-xs text-muted-foreground">{notification.time}</p>
                   </div>
                 </div>
-              ))}
+              ))} */}
             </div>
             <div className="p-2 border-t">
               <Button variant="ghost" className="w-full justify-center" size="sm">
@@ -121,9 +129,9 @@ const Header = () => {
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src=""
-                // {user?.avatar} 
-                alt={user?.firstName} />
-                <AvatarFallback>{user?.firstName}</AvatarFallback>
+                  // {user?.avatar} 
+                  alt={user?.firstName} />
+                <AvatarFallback>{user?.firstName?.[0] || ''}{user?.lastName?.[0] || ''}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -138,7 +146,7 @@ const Header = () => {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => logOut()}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

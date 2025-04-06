@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CommonDashboard = () => {
-  const { user, roles } = useAuth();
+  const { user, activeRole } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Quick stats for dashboard
@@ -40,14 +40,14 @@ const CommonDashboard = () => {
             </Avatar>
             <div>
               <h1 className="text-2xl font-bold">Welcome, {user?.firstName} {user?.lastName}</h1>
-              <p className="text-muted-foreground"> EHR Dashboard</p>
+              <p className="text-muted-foreground">EHR {activeRole} Dashboard</p>
             </div>
           </div>
 
          
         </motion.div>
 
-        {/* Roles Section */}
+        {/* Roles Section
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,18 +56,15 @@ const CommonDashboard = () => {
         >
        
           <div className="flex space-x-2">
-            {roles.map(role => (
               <motion.div 
-                key={role}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm font-medium"
               >
-                {role}
+                {activeRole}
               </motion.div>
-            ))}
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Dashboard Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

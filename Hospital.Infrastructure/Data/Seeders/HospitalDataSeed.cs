@@ -7,6 +7,7 @@ using Hospital.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 
 namespace Hospital.Infrastructure.Data.Seeders
 {
@@ -24,7 +25,7 @@ namespace Hospital.Infrastructure.Data.Seeders
             await context.Database.MigrateAsync();
 
             // Create roles if they don't exist
-            await SeedRoles(roleManager);
+            await SeedRolesAndPermissionsAsync(roleManager);
 
             // Seed admin user
             var adminUser = await SeedAdminUser(userManager, context);
@@ -33,32 +34,88 @@ namespace Hospital.Infrastructure.Data.Seeders
             // Seed doctors with specializations
             var doctors = await SeedDoctors(userManager, context, adminUser.UserInfoId);
 
+            await SeedPharmacistUser(userManager, context, adminUser.UserInfoId);
             // Seed patients
             var patients = await SeedPatients(userManager, context, adminUser.UserInfoId);
 
             // Seed appointments
             await SeedAppointments(context, doctors, patients, adminUser.UserInfoId);
+
         }
 
-        private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        public static async Task SeedRolesAndPermissionsAsync(RoleManager<IdentityRole> roleManager)
         {
-            string[] roles = { "Admin", "Doctor", "Patient", "Receptionist" };
+            // Define roles
+            string[] roleNames = { "Admin", "Doctor", "Receptionist", "Pharmacist", "Patient" };
 
-            foreach (var role in roles)
+            // Create roles if they don't exist
+            foreach (var roleName in roleNames)
             {
-                if (!await roleManager.RoleExistsAsync(role))
+                if (!await roleManager.RoleExistsAsync(roleName))
                 {
-                    var identityRole = new IdentityRole(role);
-                    await roleManager.CreateAsync(identityRole);
-                    if (role == "Receptionist")
-                    {
-                        await roleManager.AddClaimAsync(identityRole,
-                            new System.Security.Claims.Claim(ApplicationClaims.Permission, Permissions.CreatePatient));
-
-                        await roleManager.AddClaimAsync(identityRole,
-                            new System.Security.Claims.Claim(ApplicationClaims.Permission, Permissions.CreateAppointment));
-                    }
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
+            }
+
+            // Assign permissions to Doctor role
+            var doctorRole = await roleManager.FindByNameAsync("Doctor");
+            await AddPermissionsToRole(roleManager, doctorRole, new[]
+            {
+                Permissions.ViewPatient,
+                Permissions.ViewAppointment,
+                Permissions.EditAppointment,
+                Permissions.CreatePatientHistory,
+                Permissions.ViewPatientHistory,
+                Permissions.EditPatientHistory,
+                Permissions.DeletePatientHistory,
+                Permissions.CreateSkinAnalysis,
+                Permissions.ViewSkinAnalysis,
+                Permissions.EditSkinAnalysis,
+                Permissions.DeleteSkinAnalysis,
+                Permissions.CreateDiagnosis,
+                Permissions.ViewDiagnosis,
+                Permissions.EditDiagnosis,
+                Permissions.DeleteDiagnosis,
+                Permissions.CreateMedication,
+                Permissions.ViewMedication,
+                Permissions.EditMedication,
+                Permissions.DeleteMedication,
+                Permissions.ViewMedicine
+            });
+
+            // Assign permissions to Receptionist role
+            var receptionistRole = await roleManager.FindByNameAsync("Receptionist");
+            await AddPermissionsToRole(roleManager, receptionistRole, new[]
+            {
+                Permissions.CreatePatient,
+                Permissions.ViewPatient,
+                Permissions.EditPatient,
+                Permissions.DeletePatient,
+                Permissions.CreateAppointment,
+                Permissions.ViewAppointment,
+                Permissions.EditAppointment,
+                Permissions.DeleteAppointment
+            });
+
+            // Assign permissions to Pharmacist role
+            var pharmacistRole = await roleManager.FindByNameAsync("Pharmacist");
+            await AddPermissionsToRole(roleManager, pharmacistRole, new[]
+            {
+                Permissions.ViewPatient,
+                Permissions.ViewAppointment,
+                Permissions.ViewMedication,
+                Permissions.CreateMedicine,
+                Permissions.ViewMedicine,
+                Permissions.EditMedicine,
+                Permissions.DeleteMedicine
+            });
+        }
+
+        private static async Task AddPermissionsToRole(RoleManager<IdentityRole> roleManager, IdentityRole role, string[] permissions)
+        {
+            foreach (var permission in permissions)
+            {
+                await roleManager.AddClaimAsync(role, new Claim(ApplicationClaims.Permission, permission));
             }
         }
 
@@ -178,6 +235,55 @@ namespace Hospital.Infrastructure.Data.Seeders
             return user;
         }
 
+        private static async Task<User> SeedPharmacistUser(UserManager<User> userManager, ApplicationDbContext context, int createdBy)
+        {
+            const string pharmacistEmail = "pharmacist@hospital.com";
+            const string password = "Pharmacist@123456";
+            var user = await userManager.FindByEmailAsync(pharmacistEmail);
+            if (user == null)
+            {
+                // Create pharmacist user info
+                var address = new Address(
+                    "456 Pharmacy Avenue",
+                    "Pharmacy City",
+                    "Pharmacy State",
+                    "USA"
+                );
+                var userInfo = new UserInfo(
+                    pharmacistEmail,
+                    "Hospital",
+                    "",
+                    "Pharmacist",
+                    "9876543210",
+                    Gender.Female,
+                    address,
+                    DateTime.SpecifyKind(new DateTime(1985, 5, 15), DateTimeKind.Utc),
+                    createdBy // System ID for created by
+                );
+                context.UserInfos.Add(userInfo);
+                await context.SaveChangesAsync();
+                // Create pharmacist Identity user
+                user = new User
+                {
+                    UserName = pharmacistEmail,
+                    Email = pharmacistEmail,
+                    EmailConfirmed = true,
+                    PhoneNumber = "9876543210",
+                    IsPhoneNumberConfirmed = true,
+                    UserInfo = userInfo
+                };
+                var result = await userManager.CreateAsync(user, password);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(user, "Pharmacist");
+                    // Link user info
+                    user.AddUserInfo(userInfo);
+                    user.UserInfoId = userInfo.Id;
+                    await context.SaveChangesAsync();
+                }
+            }
+            return user;
+        }
         private static async Task<List<DoctorInfo>> SeedDoctors(UserManager<User> userManager, ApplicationDbContext context, int createdById)
         {
             var doctors = new List<DoctorInfo>();

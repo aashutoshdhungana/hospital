@@ -60,5 +60,13 @@ namespace Hospital.Server.Controllers
                 }
             );
         }
+
+        [Authorize]
+        [HttpPost("/api/logout")]
+        public async Task<ActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync();
+            return Ok();
+        }
     }
 }

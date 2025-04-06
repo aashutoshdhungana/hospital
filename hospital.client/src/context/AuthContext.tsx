@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [permissions, setPermissions] = useState<string[]>([]);
 	const [roles, setRoles] = useState<string[]>([]);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+	const [activeRole, setActiveRoleState] = useState<string>("");
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	useEffect(() => {
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 					setPermissions(response.data.permissions || []);
 					setRoles(response.data.roles || []);
 					setIsAuthenticated(true);
+					setActiveRoleState(localStorage.getItem(`${response.data.userInfo.id}-activeRole`) || response.data.roles[0] || "");
 				} else {
 					// If response is successful but no user data, treat as not authenticated
 					setIsAuthenticated(false);
@@ -35,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				setPermissions([]);
 				setRoles([]);
 				setIsAuthenticated(false);
+				setActiveRoleState("");
 			}
 			finally {
 				setIsLoading(false);
@@ -61,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				setPermissions(response.data.permissions || []);
 				setRoles(response.data.roles || []);
 				setIsAuthenticated(true);
+				setActiveRoleState(localStorage.getItem(`${response.data.userInfo.id}-activeRole`) || response.data.roles[0] || "");
 				return true;
 			} else {
 				throw new Error("Invalid response from server");
@@ -71,20 +75,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setPermissions([]);
 			setRoles([]);
 			setIsAuthenticated(false);
+			setActiveRoleState("");
 			throw error; // Re-throw to handle in the UI
 		}
 	};
 
-	// // Logout function
-	// const logout = async () => {
-	// 	await axios.post("/api/logout", {}, { withCredentials: true });
-	// 	setUser(null);
-	// 	setPermissions([]);
-	// 	setRoles([]);
-	// };
+	const setActiveRole = (role: string) => {
+		if (roles.includes(role)) {
+			setActiveRoleState(role);
+			localStorage.setItem(`${user?.id}-activeRole`, role);
+		} else {
+			console.error(`Role ${role} is not valid for the current user.`);
+		}
+	}
+	// Logout function
+	const logOut = async () => {
+		try {
+			await api.post("/api/logout", {}, { withCredentials: true });
+			setUser(null);
+			setPermissions([]);
+			setRoles([]);
+			setIsAuthenticated(false);
+			setActiveRoleState("");
+		}
+		catch (error) {
+			console.error("Logout failed:", error);
+		}
+	};
 
 	return (
-		<AuthContext.Provider value={{ user, permissions, roles, login, isAuthenticated }}>
+		<AuthContext.Provider value={{ user, permissions, roles, login, isAuthenticated, activeRole, setActiveRole, logOut }}>
 			{isLoading ? <Loading /> : children}
 		</AuthContext.Provider>
 	);
