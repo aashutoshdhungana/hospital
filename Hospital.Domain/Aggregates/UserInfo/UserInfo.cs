@@ -33,7 +33,7 @@ namespace Hospital.Domain.Aggregates.UserInfo
         }
         public string? Email { get; private set; }
         public string FirstName { get; private set; }
-        public string MiddleName { get; private set; }
+        public string? MiddleName { get; private set; }
         public string LastName { get; private set; }
         public string PhoneNumber { get; private set; }
         public Gender Gender { get; private set; }
@@ -44,19 +44,17 @@ namespace Hospital.Domain.Aggregates.UserInfo
             string firstName,
             string middleName,
             string lastName,
-            string phoneNumber,
             Gender gender,
             Address address,
             DateTime dateOfBirth,
             int updatedBy
             )
         {
-            Validate(firstName, lastName, phoneNumber, address, dateOfBirth);
+            ValidateUpdate(firstName, lastName, address, dateOfBirth);
 
             FirstName = firstName;
             MiddleName = middleName;
             LastName = lastName;
-            PhoneNumber = phoneNumber;
             Gender = gender;
             Address = address;
             DateOfBirth = dateOfBirth;
@@ -82,6 +80,26 @@ namespace Hospital.Domain.Aggregates.UserInfo
 
             if (dateOfBirth >= DateTime.UtcNow)
                 throw new DomainException("Date of birth must be in the past.");
+        }
+
+        private void ValidateUpdate(
+            string firstName, 
+            string lastName,  
+            Address address, 
+            DateTime dateOfBirth)
+        {
+            if (string.IsNullOrWhiteSpace(firstName))
+                throw new DomainException("First name is required.");
+
+            if (string.IsNullOrWhiteSpace(lastName))
+                throw new DomainException("Last name is required.");
+
+            if (address == null)
+                throw new DomainException("Address is required.");
+
+            if (dateOfBirth >= DateTime.UtcNow)
+                throw new DomainException("Date of birth must be in the past.");
+
         }
     }
 }

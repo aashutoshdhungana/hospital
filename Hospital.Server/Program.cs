@@ -108,7 +108,7 @@ namespace Hospital.Server
 
         public static WebApplicationBuilder AddServicesToDI(WebApplicationBuilder builder)
         {
-            builder.Services.AddValidatorsFromAssemblyContaining<CreateUpdateUserInfoDTO>();
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateUserInfoDTO>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
             builder.Services.AddScoped<IUserInfoRepository, UserInfoRepository>();
@@ -119,6 +119,7 @@ namespace Hospital.Server
             builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
             builder.Services.AddHttpContextAccessor();
             return builder;
         }

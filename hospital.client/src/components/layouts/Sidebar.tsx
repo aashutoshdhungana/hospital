@@ -42,7 +42,7 @@ const Sidebar = () => {
 
   const filteredSidebarItems = sideBarItems.filter(item => {
     if (item.permission) {
-      return hasPermission(item.permission);
+      return hasPermission(item.permission) || item.submenu?.some(subItem => !subItem.permission || hasPermission(subItem.permission));
     }
     return true;
   })

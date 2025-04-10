@@ -10,5 +10,7 @@ namespace Hospital.Application.Interfaces
         Task<ServiceResult<LoginResponse>> GetUserDetails(ClaimsPrincipal claimsPrincipal);
         Task<ServiceResult<LoginResponse>> Login(string username, string password);
         Task<ServiceResult<string>> RegisterUser(UserInfo userInfo, string password);
+        Task<ServiceResult<string>> AddUserToRole(string username, string role);
+        Task<ServiceResult<string>> RemoveUserFromRole(string username, string role);
     }
 }

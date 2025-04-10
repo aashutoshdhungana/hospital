@@ -10,7 +10,7 @@ import {
 } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Plus, User } from 'lucide-react';
-import patientService, { Patient, Gender } from '../../services/patientService';
+import patientService, { Patient, Gender } from '../../features/Patient/services/patientService';
 
 const PatientsList = () => {
   const [patients, setPatients] = useState<Patient[]>([]);

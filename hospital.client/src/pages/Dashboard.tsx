@@ -39,7 +39,7 @@ const CommonDashboard = () => {
               <AvatarFallback>{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold">Welcome, {user?.firstName} {user?.lastName}</h1>
+              <h1 className="text-2xl font-bold">Welcome, {activeRole === "Doctor" ? "Dr." : "" } {user?.firstName} {user?.lastName}</h1>
               <p className="text-muted-foreground">EHR {activeRole} Dashboard</p>
             </div>
           </div>

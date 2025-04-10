@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using Hospital.Application.Constants;
 using Hospital.Application.DTOs.Patient;
 using Hospital.Application.Interfaces;
 using Hospital.Application.Models;
+using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
 using Hospital.Domain.Aggregates.UserInfo;
 using Mapster;
@@ -66,7 +68,7 @@ namespace Hospital.Application.Services
                 createPatientDTO.PhoneNumber,
                 createPatientDTO.Gender,
                 new Address(createPatientDTO.Street, createPatientDTO.City, createPatientDTO.State, createPatientDTO.Country),
-                createPatientDTO.DateOfBirth,
+                DateTime.SpecifyKind(createPatientDTO.DateOfBirth, DateTimeKind.Utc),
                 _currentUserService.UserId.Value
             );
 
@@ -96,6 +98,12 @@ namespace Hospital.Application.Services
                 return ServiceResult<PatientInfoDTO>.Failure("Failed to create patient.");
             }
 
+            var userRoleResult = await _userIdentityService.AddUserToRole(userInfo.PhoneNumber, ApplicationRoles.Patient);
+            if (!userRoleResult.IsSuccess)
+            {
+                await _patientRepository.UnitOfWork.RollbackTransaction();
+                return ServiceResult<PatientInfoDTO>.Failure("Failed to add to role");
+            }
             var isTransactionSuccess = await _patientRepository.UnitOfWork.CommitTransaction();
             if (!isTransactionSuccess)
                 return ServiceResult<PatientInfoDTO>.Failure("Failed to create patient.");

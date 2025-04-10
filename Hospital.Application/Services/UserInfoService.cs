@@ -11,18 +11,21 @@ namespace Hospital.Application.Services
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserInfoRepository _userInfoRepository;
-        private readonly IValidator<CreateUpdateUserInfoDTO> _validator;
+        private readonly IUserIdentityService _userIdentityService;
+        private readonly IValidator<CreateUserInfoDTO> _validator;
         public UserInfoService(
             ICurrentUserService currentUserService,
             IUserInfoRepository userInfoRepository,
-            IValidator<CreateUpdateUserInfoDTO> validator
+            IUserIdentityService userIdentityService,
+            IValidator<CreateUserInfoDTO> validator
             )
         {
             _currentUserService = currentUserService;
             _userInfoRepository = userInfoRepository;
+            _userIdentityService = userIdentityService;
             _validator = validator;
         }
-        public async Task<ServiceResult<UserInfoDTO>> Create(CreateUpdateUserInfoDTO createUserInfoDTO)
+        public async Task<ServiceResult<UserInfoDTO>> Create(CreateUserInfoDTO createUserInfoDTO)
         {
             var validationResult = _validator.Validate(createUserInfoDTO);
             if (!validationResult.IsValid)
@@ -30,6 +33,8 @@ namespace Hospital.Application.Services
 
             if ((_currentUserService.UserId ?? 0) <= 0)
                 return ServiceResult<UserInfoDTO>.Unauthorized();
+
+            await _userInfoRepository.UnitOfWork.BeginTransaction();
 
             var userInfo = new UserInfo(
                 createUserInfoDTO.Email,
@@ -45,7 +50,17 @@ namespace Hospital.Application.Services
 
             _userInfoRepository.Add(userInfo);
 
-            var isSuccess = await _userInfoRepository.UnitOfWork.CommitAsync();
+            var isUserInfoCreated = await _userInfoRepository.UnitOfWork.CommitAsync();
+
+            var identityResult = await _userIdentityService.RegisterUser(userInfo, $"P@aasword123");
+            if (!identityResult.IsSuccess)
+            {
+                await _userInfoRepository.UnitOfWork.RollbackTransaction();
+                return ServiceResult<UserInfoDTO>.Failure("Failed to create user account");
+            }
+
+            var isSuccess = await _userInfoRepository.UnitOfWork.CommitTransaction();
+
             return isSuccess ? ServiceResult<UserInfoDTO>.Created(userInfo.Adapt<UserInfoDTO>())
                 : ServiceResult<UserInfoDTO>.Failure("Failed to add user info.");
         }
@@ -82,7 +97,7 @@ namespace Hospital.Application.Services
                 .Success(userInfos.Adapt<IEnumerable<UserInfoDTO>>());
         }
 
-        public async Task<ServiceResult<UserInfoDTO>> Update(int userId, CreateUpdateUserInfoDTO userInfoDTO)
+        public async Task<ServiceResult<UserInfoDTO>> Update(int userId, CreateUserInfoDTO userInfoDTO)
         {
             if ((_currentUserService.UserId ?? 0) <= 0)
                 return ServiceResult<UserInfoDTO>.Unauthorized();
@@ -95,7 +110,6 @@ namespace Hospital.Application.Services
                 userInfoDTO.FirstName,
                 userInfoDTO.MiddleName,
                 userInfoDTO.LastName,
-                userInfoDTO.PhoneNumber,
                 userInfoDTO.Gender,
                 new Address(userInfoDTO.Street, userInfoDTO.City, userInfoDTO.State, userInfoDTO.Country),
                 userInfoDTO.DateOfBirth,

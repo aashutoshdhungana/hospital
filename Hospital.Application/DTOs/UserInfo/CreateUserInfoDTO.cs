@@ -2,7 +2,7 @@
 
 namespace Hospital.Application.DTOs.UserInfo
 {
-    public class CreateUpdateUserInfoDTO
+    public class CreateUserInfoDTO
     {
         public string Email { get; set; }
         public string FirstName { get; set; }

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import appointmentService from '../../services/appointmentService';
-import patientService, { Patient } from '../../services/patientService';
+import patientService, { Patient } from '../../features/Patient/services/patientService';
 import { DateTimePicker } from '../../components/ui/date-time-picker';
 
 const CreateAppointment = () => {

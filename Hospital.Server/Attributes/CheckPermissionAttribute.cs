@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hospital.Application.Constants;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Hospital.Server.Attributes
@@ -24,11 +25,11 @@ namespace Hospital.Server.Attributes
             if (user.IsInRole("Admin"))
                 return;
 
-            if (user.HasClaim(c => c.Type == "permission" && c.Value == "*"))
+            if (user.HasClaim(c => c.Type == ApplicationClaims.Permission && c.Value == "*"))
                 return;
 
             if (_requiredPermissions.Any(perm =>
-                user.HasClaim(c => c.Type == "permission" && c.Value == perm)))
+                user.HasClaim(c => c.Type == ApplicationClaims.Permission && c.Value == perm)))
                 return;
 
             context.Result = new ForbidResult();

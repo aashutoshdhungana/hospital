@@ -16,6 +16,9 @@ const CreateMedicine = lazy(() => import('../pages/medicines/Create'));
 const EditMedicine = lazy(() => import('../pages/medicines/Edit'));
 const MedicineList = lazy(() => import('../pages/medicines/List'));
 const LoginForm = lazy(() => import('../pages/Login'));
+const CreateDoctor = lazy(() => import('../pages/doctors/Create'));
+const EditDoctor = lazy(() => import('../pages/doctors/Edit'));
+const AllDoctors = lazy(() => import('../pages/doctors/List'));
 
 const RouteConfig: RouteObject[] = [
     {
@@ -38,48 +41,73 @@ const RouteConfig: RouteObject[] = [
                     },
                     {
                         path: '/patients',
-                        element: <ProtectedRoute requiredPermissions={['patients.list']} />,
+                        element: <ProtectedRoute requiredPermissions={['patients.view']} />,
                         children: [{index: true, element: <AllPatients />}],
                     },
                     {
-                        path: '/patients/new',
+                        path: '/patient/new',
                         element: <ProtectedRoute requiredPermissions={['patients.create']} />,
                         children: [{index: true, element: <CreatePatient />}],        
                     },
                     {
-                        path: '/patients/edit/:id',
+                        path: '/patient/edit/:id',
                         element: <ProtectedRoute requiredPermissions={['patients.edit']} />,
                         children: [{index: true, element: <EditPatient />}],        
                     },
                     {
                         path: '/appointments',
-                        element: <ProtectedRoute requiredPermissions={['appointments.list']} />,    
+                        element: <ProtectedRoute requiredPermissions={['appointments.view']} />,    
                         children: [{index: true, element: <AppointmentList />}],
                     },
                     {
-                        path: '/appointments/new',
+                        path: '/appointments/assigned-to/:doctorId',
+                        element: <ProtectedRoute requiredPermissions={['appointments.view']} />,    
+                        children: [{index: true, element: <AppointmentList />}],
+                    },
+                    {
+                        path: '/appointments/assigned-to-me',
+                        element: <ProtectedRoute requiredPermissions={['appointments.me']} />,    
+                        children: [{index: true, element: <AppointmentList />}],
+                    },
+                    {
+                        path: '/appointment/new',
                         element: <ProtectedRoute requiredPermissions={['appointments.create']} />,
                         children: [{index: true, element: <CreateAppointment />}],
                     },
                     {
-                        path: '/appointments/edit/:id',
+                        path: '/appointment/edit/:id',
                         element: <ProtectedRoute requiredPermissions={['appointments.edit']} />,
                         children: [{index: true, element: <EditAppointment />}],
                     },
                     {
                         path: '/medicines',
-                        element: <ProtectedRoute requiredPermissions={['medicines.list']} />,
+                        element: <ProtectedRoute requiredPermissions={['medicines.view']} />,
                         children: [{index: true, element: <MedicineList />}],
                     },
                     {
-                        path: '/medicines/new',
+                        path: '/medicine/new',
                         element: <ProtectedRoute requiredPermissions={['medicines.create']} />,
                         children: [{index: true, element: <CreateMedicine />}],
                     },
                     {
-                        path: '/medicines/edit/:id',
+                        path: '/medicine/edit/:id',
                         element: <ProtectedRoute requiredPermissions={['medicines.edit']} />,
                         children: [{index: true, element: <EditMedicine />}],
+                    },
+                    {
+                        path: '/doctor/new',
+                        element: <ProtectedRoute requiredPermissions={['doctors.create']} />,
+                        children: [{ index: true, element: <CreateDoctor />}],
+                    },
+                    {
+                        path: '/doctor/edit/:id',
+                        element: <ProtectedRoute requiredPermissions={['doctors.edit']} />,
+                        children: [{ index: true, element: <EditDoctor />}],
+                    },
+                    {
+                        path: '/doctors',
+                        element: <ProtectedRoute requiredPermissions={['doctors.view']} />,
+                        children: [{ index: true, element: <AllDoctors />}],
                     }
                 ]
             }

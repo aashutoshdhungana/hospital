@@ -1,4 +1,4 @@
-import { LucideIcon, LayoutDashboard, Calendar, Users, Pill } from 'lucide-react';
+import { LucideIcon, LayoutDashboard, Calendar, Users, Pill, Stethoscope } from 'lucide-react';
 
 export interface SubMenuItem {
     path: string;
@@ -21,13 +21,23 @@ const sideBarItems: SidebarItem[] = [
         icon: LayoutDashboard
     },
     {
+        path: '/doctors',
+        label: 'Doctors',
+        icon: Stethoscope,
+        permission: 'doctors.view',
+        submenu: [
+            { path: '/doctors', label: 'All Doctors', permission: 'doctors.view' },
+            { path: '/doctor/new', label: 'Create', permission: 'doctors.create' },
+        ]
+    },
+    {
         path: '/patients',
         label: 'Patients',
         icon: Users,
         permission: 'patients.view',
         submenu: [
-            { path: '/patients/list', label: 'All Patients', permission: 'patients.view' },
-            { path: '/patients/new', label: 'Create', permission: 'patients.create' }
+            { path: '/patients', label: 'All Patients', permission: 'patients.view' },
+            { path: '/patient/new', label: 'Create', permission: 'patients.create' }
         ]
     },
     {
@@ -36,18 +46,19 @@ const sideBarItems: SidebarItem[] = [
         icon: Calendar,
         permission: 'appointments.view',
         submenu: [
-            { path: '/appointments/list', label: 'All Appointments', permission: 'appointments.view' },
-            { path: '/appointments/create', label: 'Create', permission: 'appointments.create' }
+            { path: '/appointments', label: 'All Appointments', permission: 'appointments.view' },
+            { path: '/appointments/assigned-to-me', label: 'My Appointments', permission: 'appointments.me' },
+            { path: '/appointment/new', label: 'Create', permission: 'appointments.create' }
         ]
     },
     {
         path: '/medicines',
         label: 'Medicines',
         icon: Pill,
-        permission: 'medicine.view',
+        permission: 'medicines.view',
         submenu: [
-            { path: '/medicines/list', label: 'All Medicines', permission: 'medicine.view' },
-            { path: '/medicines/create', label: 'Create', permission: 'medicine.create' }
+            { path: '/medicines', label: 'All Medicines', permission: 'medicines.view' },
+            { path: '/medicine/new', label: 'Create', permission: 'medicines.create' }
         ]
     }
 ];

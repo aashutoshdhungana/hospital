@@ -1,12 +1,16 @@
 ﻿using FluentValidation;
-using Hospital.Application.DTOs.Patient;
+using Hospital.Application.DTOs.UserInfo;
 
-namespace Hospital.Application.Validator
+namespace Hospital.Application.Validator.UserInfo
 {
-    public class CreatePatientValidator : AbstractValidator<CreatePatientDTO>
+    public class CreateUserInfoValidator : AbstractValidator<CreateUserInfoDTO>
     {
-        public CreatePatientValidator()
+        public CreateUserInfoValidator()
         {
+            RuleFor(x => x.Email)
+                .EmailAddress()
+                .WithMessage("Email address is invalid.");
+
             RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required")
             .MaximumLength(50).WithMessage("First name cannot exceed 50 characters");
@@ -43,15 +47,6 @@ namespace Hospital.Application.Validator
 
             RuleFor(x => x.DateOfBirth)
                 .NotEmpty().WithMessage("Date of birth is required");
-
-            RuleFor(x => x.EmergencyContactPerson)
-                .NotEmpty().WithMessage("Emergency contact person is  required");
-
-            RuleFor(x => x.EmergencyContactNumber)
-                .NotEmpty().WithMessage("Emergency contact number is required");
-
-            RuleFor(x => x.Email)
-                .EmailAddress().WithMessage("Email address is not valid");
         }
     }
 }

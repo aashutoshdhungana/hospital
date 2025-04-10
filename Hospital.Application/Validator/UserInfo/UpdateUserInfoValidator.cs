@@ -1,16 +1,12 @@
 ﻿using FluentValidation;
 using Hospital.Application.DTOs.UserInfo;
 
-namespace Hospital.Application.Validator
+namespace Hospital.Application.Validator.UserInfo
 {
-    public class CreateUpdateUserInfoValidator : AbstractValidator<CreateUpdateUserInfoDTO>
+    public class UpdateUserInfoValidator : AbstractValidator<UpdateUserInfoDTO>
     {
-        public CreateUpdateUserInfoValidator()
+        public UpdateUserInfoValidator()
         {
-            RuleFor(x => x.Email)
-                .EmailAddress()
-                .WithMessage("Email address is invalid.");
-
             RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required")
             .MaximumLength(50).WithMessage("First name cannot exceed 50 characters");
@@ -21,10 +17,6 @@ namespace Hospital.Application.Validator
             RuleFor(x => x.LastName)
                 .NotEmpty().WithMessage("Last name is required")
                 .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters");
-
-            RuleFor(x => x.PhoneNumber)
-                .NotEmpty().WithMessage("Phone number is required")
-                .Matches(@"^\+?[0-9]{7,15}$").WithMessage("Invalid phone number format");
 
             RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage("Invalid gender selection");

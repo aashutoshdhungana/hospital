@@ -8,9 +8,15 @@
         public const string DeletePatient = "patients.delete";
 
         public const string CreateAppointment = "appointments.create";
+        public const string MyAppointments = "appointments.me";
         public const string ViewAppointment = "appointments.view";
         public const string EditAppointment = "appointments.edit";
         public const string DeleteAppointment = "appointments.delete";
+
+        public const string CreateDoctor = "doctors.create";
+        public const string ViewDoctor = "doctors.view";
+        public const string EditDoctor = "doctors.edit";
+        public const string DeleteDoctor = "doctors.delete";
 
         public const string CreatePatientHistory = "phistory.create";
         public const string ViewPatientHistory = "phistory.view";
