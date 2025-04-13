@@ -1,9 +1,8 @@
-﻿using Hospital.Application.DTOs.UserInfo;
+﻿namespace Hospital.Application.DTOs.Patient;
 
-namespace Hospital.Application.DTOs.Patient;
-
-public class CreatePatientDTO : CreateUserInfoDTO
+public class CreatePatientDTO
 {
+    public int UserInfoId { get; set; }
     public string EmergencyContactPerson { get; set; }
     public string EmergencyContactNumber { get; set; }
 }

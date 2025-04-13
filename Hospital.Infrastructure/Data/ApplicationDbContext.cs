@@ -2,6 +2,7 @@
 using Hospital.Domain.Aggregates.Appointment;
 using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
+using Hospital.Domain.Aggregates.Rx;
 using Hospital.Domain.Aggregates.UserInfo;
 using Hospital.Domain.BaseEntities;
 using Hospital.Domain.Exceptions;
@@ -9,6 +10,7 @@ using Hospital.Domain.Interfaces;
 using Hospital.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
@@ -34,11 +36,17 @@ public class ApplicationDbContext : IdentityDbContext<User>, IUnitOfWork
     public DbSet<PatientInfo> PatientInfos { get; set; }
     public DbSet<DoctorInfo> DoctorInfos { get; set; }
     public DbSet<AppointmentInfo> AppointmentInfos { get; set; }
+    public DbSet<RxInfo> RxInfos { get; set; }
+    public DbSet<MedicalAssesment> MedicalAssesments { get; set; }
+    public DbSet<MedicationPrescibed> MedicationPrescibed { get; set; }
+    public DbSet<SkinAnalysis> SkinAnalyses { get; set; }
+    public DbSet<SkinAnalysisType> SkinAnalysisTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        builder.ConfigureSoftDelteQueryFilter();
+        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly)
+            .ConfigureSoftDelteQueryFilter()
+            .ConfigureCreatedByAndUpdatedByRelationship();
         base.OnModelCreating(builder);
     }
 
@@ -85,11 +93,11 @@ public class ApplicationDbContext : IdentityDbContext<User>, IUnitOfWork
     private void SoftDelete()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => (e.Entity is SoftDeletable) && e.State == EntityState.Deleted);
+            .Where(e => (e.Entity is ISoftDeletable) && e.State == EntityState.Deleted);
 
         foreach (var entry in entries)
         {
-            var entity = (SoftDeletable)entry.Entity;
+            var entity = (ISoftDeletable)entry.Entity;
 
             if (!_currentUserService.UserId.HasValue)
                 throw new DomainException("Unauthenticated user cannot perform delete operation.");

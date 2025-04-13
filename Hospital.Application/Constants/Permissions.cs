@@ -7,6 +7,11 @@
         public const string EditPatient = "patients.edit";
         public const string DeletePatient = "patients.delete";
 
+        public const string CreateUser = "user.create";
+        public const string ViewUser = "user.view";
+        public const string EditUser = "user.edit";
+        public const string DeleteUser = "user.delete";
+
         public const string CreateAppointment = "appointments.create";
         public const string MyAppointments = "appointments.me";
         public const string ViewAppointment = "appointments.view";

@@ -1,4 +1,4 @@
-import { LucideIcon, LayoutDashboard, Calendar, Users, Pill, Stethoscope } from 'lucide-react';
+import { LucideIcon, LayoutDashboard, Calendar, Users, Pill, Stethoscope, UserCog2Icon } from 'lucide-react';
 
 export interface SubMenuItem {
     path: string;
@@ -59,6 +59,16 @@ const sideBarItems: SidebarItem[] = [
         submenu: [
             { path: '/medicines', label: 'All Medicines', permission: 'medicines.view' },
             { path: '/medicine/new', label: 'Create', permission: 'medicines.create' }
+        ]
+    },
+    {
+        path: '/users',
+        label: 'Users',
+        icon: UserCog2Icon,
+        permission: 'users.view',
+        submenu: [
+            { path: '/users', label: 'All Users', permission: 'users.view' },
+            { path: '/user/new', label: 'Create', permission: 'users.create' }
         ]
     }
 ];

@@ -18,7 +18,7 @@ namespace Hospital.Domain.Aggregates.UserInfo
             Gender gender,
             Address address,
             DateTime dateOfBirth,
-            int createdBy
+            int? createdBy
             ) : base(createdBy)
         {
             Validate(firstName, lastName, phoneNumber, address, dateOfBirth);
@@ -39,8 +39,9 @@ namespace Hospital.Domain.Aggregates.UserInfo
         public Gender Gender { get; private set; }
         public Address Address { get; private set; }
         public DateTime DateOfBirth { get; private set; }
-
+        public string FullName => $"{FirstName} {(string.IsNullOrWhiteSpace(MiddleName) ? "" : MiddleName[0] + ".")} {LastName}";
         public void Update(
+            string email,
             string firstName,
             string middleName,
             string lastName,
@@ -52,6 +53,7 @@ namespace Hospital.Domain.Aggregates.UserInfo
         {
             ValidateUpdate(firstName, lastName, address, dateOfBirth);
 
+            Email = email;
             FirstName = firstName;
             MiddleName = middleName;
             LastName = lastName;
@@ -60,7 +62,6 @@ namespace Hospital.Domain.Aggregates.UserInfo
             DateOfBirth = dateOfBirth;
             Updated(updatedBy);
         }
-
         private void Validate(string firstName, string lastName, string phoneNumber, Address address, DateTime dateOfBirth)
         {
             if (string.IsNullOrWhiteSpace(firstName))

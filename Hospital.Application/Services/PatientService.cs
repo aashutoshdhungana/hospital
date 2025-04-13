@@ -60,42 +60,23 @@ namespace Hospital.Application.Services
 
             await _patientRepository.UnitOfWork.BeginTransaction();
 
-            var userInfo = new UserInfo(
-                createPatientDTO.Email,
-                createPatientDTO.FirstName,
-                createPatientDTO.MiddleName,
-                createPatientDTO.LastName,
-                createPatientDTO.PhoneNumber,
-                createPatientDTO.Gender,
-                new Address(createPatientDTO.Street, createPatientDTO.City, createPatientDTO.State, createPatientDTO.Country),
-                DateTime.SpecifyKind(createPatientDTO.DateOfBirth, DateTimeKind.Utc),
-                _currentUserService.UserId.Value
-            );
-
-            _userInfoRepository.Add(userInfo);
+            var userInfo = await _userInfoRepository.GetById(createPatientDTO.UserInfoId);
+            if (userInfo == null)
+                return ServiceResult<PatientInfoDTO>.Failure("User profile information is not created.");
 
             var patientInfo = new PatientInfo(
                 userInfo,
                 createPatientDTO.EmergencyContactPerson,
                 createPatientDTO.EmergencyContactNumber,
                 _currentUserService.UserId.Value
-            );
+             );
 
             _patientRepository.Add(patientInfo);
-
-            var isPatientInfoAdded = await _patientRepository.UnitOfWork.CommitAsync();
-            if (!isPatientInfoAdded)
+            var isPatientAdded = await _patientRepository.UnitOfWork.CommitAsync();
+            if (!isPatientAdded)
             {
                 await _patientRepository.UnitOfWork.RollbackTransaction();
-                return ServiceResult<PatientInfoDTO>.Failure("Failed to create patient.");
-            }
-
-            var userIdentityResult = await _userIdentityService.RegisterUser(userInfo, $"Patient@{patientInfo.Id}");
-
-            if (!userIdentityResult.IsSuccess)
-            {
-                await _patientRepository.UnitOfWork.RollbackTransaction();
-                return ServiceResult<PatientInfoDTO>.Failure("Failed to create patient.");
+                return ServiceResult<PatientInfoDTO>.Failure("Failed to add patient");
             }
 
             var userRoleResult = await _userIdentityService.AddUserToRole(userInfo.PhoneNumber, ApplicationRoles.Patient);
@@ -104,11 +85,12 @@ namespace Hospital.Application.Services
                 await _patientRepository.UnitOfWork.RollbackTransaction();
                 return ServiceResult<PatientInfoDTO>.Failure("Failed to add to role");
             }
+
             var isTransactionSuccess = await _patientRepository.UnitOfWork.CommitTransaction();
             if (!isTransactionSuccess)
                 return ServiceResult<PatientInfoDTO>.Failure("Failed to create patient.");
 
-            return ServiceResult<PatientInfoDTO>.Success(default!);
+            return ServiceResult<PatientInfoDTO>.Success(patientInfo.Adapt<PatientInfoDTO>());
         }
 
         public Task<ServiceResult<PatientInfoDTO>> UpdatePatient(int id, UpdatePatientDTO updatePatientDTO)

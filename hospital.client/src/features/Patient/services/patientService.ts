@@ -1,28 +1,5 @@
 import axios, { AxiosError } from 'axios';
-
-export interface Patient {
-  id?: number;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  emergencyContactPerson: string;
-  emergencyContactNumber: string;
-  gender: number;
-  street?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  dateOfBirth: string;
-}
-
-// Enum for gender to make the form more user-friendly
-export enum Gender {
-  Male = 0,
-  Female = 1,
-  Other = 2
-}
+import Patient from '../schema/PatientSchema';
 
 const patientService = {
   getPatients: async (): Promise<Patient[]> => {

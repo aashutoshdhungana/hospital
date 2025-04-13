@@ -7,7 +7,7 @@ import Unauthorized from "../pages/Unauthorized";
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const AllPatients = lazy(() => import('../pages/patients/List'));
-const CreatePatient = lazy(() => import('../pages/patients/Create'));
+const CreatePatient = lazy(() => import('../pages/patients/Create_backup'));
 const EditPatient = lazy(() => import('../pages/patients/Edit'));
 const AppointmentList = lazy(() => import('../pages/appointments/AppointmentList'));
 const CreateAppointment = lazy(() => import('../pages/appointments/CreateAppointment'));
@@ -19,7 +19,9 @@ const LoginForm = lazy(() => import('../pages/Login'));
 const CreateDoctor = lazy(() => import('../pages/doctors/Create'));
 const EditDoctor = lazy(() => import('../pages/doctors/Edit'));
 const AllDoctors = lazy(() => import('../pages/doctors/List'));
-
+const CreateUser = lazy(() => import('../pages/userInfo/Create'));
+const EditUser = lazy(() => import('../pages/userInfo/Edit'));
+const AllUsers = lazy(() => import('../pages/userInfo/List'));
 const RouteConfig: RouteObject[] = [
     {
         path: '/login',
@@ -108,6 +110,21 @@ const RouteConfig: RouteObject[] = [
                         path: '/doctors',
                         element: <ProtectedRoute requiredPermissions={['doctors.view']} />,
                         children: [{ index: true, element: <AllDoctors />}],
+                    },
+                    {
+                        path: '/users',
+                        element: <ProtectedRoute requiredPermissions={['users.view']} />,
+                        children: [{ index: true, element: <AllUsers />}]
+                    },
+                    {
+                        path: '/user/edit/:id',
+                        element: <ProtectedRoute requiredPermissions={['users.edit']} />,
+                        children: [{ index: true, element: <EditUser />}]
+                    },
+                    {
+                        path: '/user/new',
+                        element: <ProtectedRoute requiredPermissions={['users.create']} />,
+                        children: [{ index: true, element: <CreateUser />}]
                     }
                 ]
             }

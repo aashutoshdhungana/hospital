@@ -11,10 +11,14 @@ namespace Hospital.Domain.Aggregates.Doctor
         public DoctorInfo(
             UserInfo.UserInfo userInfo,
             Specialization specializations,
+            string medicalLicenseNumber,
+            double pastExperience,
             int createdBy
         ) : base(createdBy)
         {
             UserInfo = userInfo;
+            MedicalLicenseNumber = medicalLicenseNumber;
+            PastExperienceInYears = pastExperience;
             Specialization = specializations;
         }
         public int UserInfoId { get; private set; }

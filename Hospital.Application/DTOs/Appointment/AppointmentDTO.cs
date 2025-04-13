@@ -1,4 +1,6 @@
-﻿namespace Hospital.Application.DTOs.Appointment
+﻿using Hospital.Application.DTOs.MedicalAssesment;
+
+namespace Hospital.Application.DTOs.Appointment
 {
     public class AppointmentDTO
     {
@@ -8,5 +10,6 @@
         public string PatientName { get; set; }
         public DateTime AppointmentDate { get; set; }
         public string Status { get; set; }
+        public MedicalAssesmentDTO MedicalAssesment { get; set; }
     }
 }

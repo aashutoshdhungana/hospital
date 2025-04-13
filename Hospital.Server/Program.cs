@@ -7,9 +7,11 @@ using Hospital.Application.Services;
 using Hospital.Domain.Aggregates.Appointment;
 using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
+using Hospital.Domain.Aggregates.Rx;
 using Hospital.Domain.Aggregates.UserInfo;
 using Hospital.Infrastructure.Data;
 using Hospital.Infrastructure.Data.Seeders;
+using Hospital.Infrastructure.Identity;
 using Hospital.Infrastructure.Identity.Models;
 using Hospital.Infrastructure.Repositories;
 using Hospital.Infrastructure.Services;
@@ -120,6 +122,9 @@ namespace Hospital.Server
             builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
+            builder.Services.AddScoped<IRxRepository, RxRepository>();
+            builder.Services.AddScoped<IRxInfoService, RxInfoService>();
             builder.Services.AddHttpContextAccessor();
             return builder;
         }

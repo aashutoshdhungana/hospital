@@ -149,8 +149,8 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "1234567890",
                     Gender.Male,
                     adminAddress,
-                    DateTime.SpecifyKind(new DateTime(1980, 1, 1), DateTimeKind.Utc),
-                    1 // System ID for created by
+                    new DateTime(1980, 1, 1),
+                    null // System ID for created by
                 );
 
                 context.UserInfos.Add(adminUserInfo);
@@ -207,7 +207,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "1234567891",
                     Gender.Male,
                     address,
-                    DateTime.SpecifyKind(new DateTime(1980, 1, 1), DateTimeKind.Utc),
+                    new DateTime(1980, 1, 1),
                     createdBy // System ID for created by
                 );
 
@@ -262,7 +262,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "9876543210",
                     Gender.Female,
                     address,
-                    DateTime.SpecifyKind(new DateTime(1985, 5, 15), DateTimeKind.Utc),
+                    new DateTime(1985, 5, 15),
                     createdBy // System ID for created by
                 );
                 context.UserInfos.Add(userInfo);
@@ -314,7 +314,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "2345678901",
                     Gender.Male,
                     doctor1Address,
-                    DateTime.SpecifyKind(new DateTime(1975, 5, 15), DateTimeKind.Utc),
+                    new DateTime(1975, 5, 15),
                     createdById
                 );
 
@@ -325,6 +325,8 @@ namespace Hospital.Infrastructure.Data.Seeders
                 var doctor1 = new DoctorInfo(
                     doctor1UserInfo,
                     Specialization.Cardiologist,
+                    "ML123455",
+                    2.5,
                     createdById
                 );
 
@@ -372,7 +374,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "3456789012",
                     Gender.Female,
                     doctor2Address,
-                    DateTime.SpecifyKind(new DateTime(1980, 8, 20), DateTimeKind.Utc),
+                    new DateTime(1980, 8, 20),
                     createdById
                 );
 
@@ -383,6 +385,8 @@ namespace Hospital.Infrastructure.Data.Seeders
                 var doctor2 = new DoctorInfo(
                     doctor2UserInfo,
                     Specialization.Neurologist,
+                    "test123",
+                    1,
                     createdById
                 );
 
@@ -437,7 +441,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "4567890123",
                     Gender.Male,
                     patient1Address,
-                    DateTime.SpecifyKind(new DateTime(1990, 3, 10), DateTimeKind.Utc),
+                    new DateTime(1990, 3, 10),
                     createdById
                 );
 
@@ -496,7 +500,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                     "5678901234",
                     Gender.Female,
                     patient2Address,
-                    DateTime.SpecifyKind(new DateTime(1985, 7, 25), DateTimeKind.Utc),
+                    new DateTime(1985, 7, 25),
                     createdById
                 );
 

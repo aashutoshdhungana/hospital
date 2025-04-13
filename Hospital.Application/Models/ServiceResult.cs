@@ -40,12 +40,22 @@ namespace Hospital.Application.Models
         public static ServiceResult<T> FromValidationResult(ValidationResult validationResult)
         {
             var fieldErrors = validationResult.Errors
-                .GroupBy(e => e.PropertyName)
+                .GroupBy(e => ToCamelCase(e.PropertyName))
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
             return new ServiceResult<T>(ResultTypes.ValidationError, fieldErrors, new List<string>());
         }
 
+        private static string ToCamelCase(string input)
+        {
+            if (string.IsNullOrEmpty(input) || char.IsLower(input[0]))
+                return input;
+
+            if (input.Length == 1)
+                return input.ToLower();
+
+            return char.ToLowerInvariant(input[0]) + input.Substring(1);
+        }
     }
 
 }

@@ -1,5 +1,8 @@
 ﻿using FluentValidation;
 using Hospital.Application.DTOs.Appointment;
+using Hospital.Application.DTOs.MedicalAssesment;
+using Hospital.Application.DTOs.MedicationPrescribed;
+using Hospital.Application.DTOs.SkinAnalysis;
 using Hospital.Application.Interfaces;
 using Hospital.Application.Models;
 using Hospital.Application.Models.Appointments;
@@ -31,6 +34,190 @@ namespace Hospital.Application.Services
             _doctorRepository = doctorRepository;
             _patientRepository = patientRepository;
         }
+
+        public async Task<ServiceResult<string>> AddMedicalAssessmentAsync(int appointmentId, CreateUpdateMedicalAssesmentDTO assessment)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["MedicalAssesment"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            if (appointmentInfo.MedicalAssesment != null)
+            {
+                appointmentInfo.MedicalAssesment.Update(
+                    assessment.ChiefComplaint,
+                    assessment.HistoryOfIllness,
+                    assessment.Diagnosis,
+                    assessment.Advice,
+                    _currentUserService.UserId.Value
+                );
+            }
+            else
+            {
+                appointmentInfo.SetMedicalAssessment(new MedicalAssesment(
+                    appointmentInfo.Id,
+                    assessment.ChiefComplaint,
+                    assessment.HistoryOfIllness,
+                    assessment.Diagnosis,
+                    assessment.Advice,
+                    _currentUserService.UserId.Value
+                ));
+            }
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Medical assesment added successfully")
+                : ServiceResult<string>.Failure("Failed to update medical assesment");
+        }
+
+        public async Task<ServiceResult<string>> AddMedicationAsync(int appointmentId, CreateUpdateMedicationPrescribedDTO medication)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["MedicationPrescibed"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            appointmentInfo.AddMedication(new MedicationPrescibed(
+                _currentUserService.UserId.Value,
+                appointmentInfo.Id,
+                medication.RxId,
+                medication.ApplicationType,
+                medication.TimesPerDay,
+                medication.DurationInDays,
+                medication.StartDate,
+                medication.Remarks
+            ));
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Successfully added medication")
+                : ServiceResult<string>.Failure("Failed to add medication");
+        }
+
+        public async Task<ServiceResult<string>> UpdateMedicationAsync(int appointmentId, int medicationId, CreateUpdateMedicationPrescribedDTO medication)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["MedicationPrescibed"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            var dbMedication = appointmentInfo.MedicationPrescibed.FirstOrDefault(x => x.Id == medicationId);
+            if (dbMedication == null)
+                return ServiceResult<string>.NotFound();
+
+            dbMedication.Update(
+                _currentUserService.UserId.Value,
+                medication.RxId,
+                medication.ApplicationType,
+                medication.TimesPerDay,
+                medication.DurationInDays,
+                medication.StartDate,
+                medication.Remarks
+            );
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Successfully updated medication")
+                : ServiceResult<string>.Failure("Failed to update medication");
+
+        }
+
+        public async Task<ServiceResult<string>> RemoveMedicationAsync(int appointmentId, int medicationId)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["MedicationPrescibed"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            var medication = appointmentInfo.MedicationPrescibed.FirstOrDefault(x => x.Id == medicationId);
+            if (medication == null)
+                return ServiceResult<string>.NotFound();
+
+            appointmentInfo.RemoveMedication(medication);
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+
+            return isSuccess ? ServiceResult<string>.Success("Successfully removed the medication")
+                : ServiceResult<string>.Failure("Failed to remove the medication");
+        }
+
+        public async Task<ServiceResult<string>> AddSkinAnalysisAsync(int appointmentId, CreateUpdateSkinAnalysisDTO analysis)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["SkinAnalyses"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            appointmentInfo.AddSkinAnalysis(new SkinAnalysis(
+                analysis.SkinAnalysisTypeId,
+                appointmentInfo.Id,
+                analysis.Analysis,
+                analysis.IsAbnormal,
+                _currentUserService.UserId.Value
+            ));
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Successfully added skin analysis")
+                : ServiceResult<string>.Failure("Failed to add skin analysis");
+        }
+
+        public async Task<ServiceResult<string>> UpdateSkinAnalysisAsync(int appointmentId, int analysisId, CreateUpdateSkinAnalysisDTO analysis)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["SkinAnalyses"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            var dbAnalysis = appointmentInfo.SkinAnalyses.FirstOrDefault(x => x.Id == analysisId);
+            if (dbAnalysis == null)
+                return ServiceResult<string>.NotFound();
+
+            dbAnalysis.Update(
+                analysis.SkinAnalysisTypeId,
+                analysis.Analysis,
+                analysis.IsAbnormal,
+                _currentUserService.UserId.Value
+            );
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Successfully updated skin analysis")
+                : ServiceResult<string>.Failure("Failed to update skin analysis");
+        }
+
+        public async Task<ServiceResult<string>> RemoveSkinAnalysisAsync(int appointmentId, int analysisId)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentId, ["SkinAnalyses"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            var analysis = appointmentInfo.SkinAnalyses.FirstOrDefault(x => x.Id == analysisId);
+            if (analysis == null)
+                return ServiceResult<string>.NotFound();
+
+            appointmentInfo.RemoveSkinAnalysis(analysis);
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Successfully removed skin analysis")
+                : ServiceResult<string>.Failure("Failed to remove skin analysis");
+        }
+
         public async Task<ServiceResult<string>> CreateAppointment(CreateAppointmentDTO appointmentModel)
         {
             if (!_currentUserService.UserId.HasValue)
@@ -64,6 +251,32 @@ namespace Hospital.Application.Services
                 ServiceResult<string>.Failure("Failed to create appointment");
         }
 
+        public async Task<ServiceResult<string>> DeleteAppointment(int appointmentInfoId)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentInfoId, ["MedicationPrescibed", "SkinAnalyses", "MedicalAssesment"]);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            if (appointmentInfo.Status == AppointmentStatus.Completed) 
+            {
+                return ServiceResult<string>.Failure("Completed appointment cannot be deleted");
+            }
+
+            if (appointmentInfo.SkinAnalyses.Any() || appointmentInfo.MedicationPrescibed.Any() || appointmentInfo.MedicalAssesment != null) 
+            {
+                return ServiceResult<string>.Failure("Appointment cannot be deleted as it contains related data");
+            }
+
+            _appointmentRepository.Delete(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+
+            return isSuccess ? ServiceResult<string>.Success("Deleted appointment successfully")
+                : ServiceResult<string>.Failure("Failed to delete appointment");
+        }
+
         public async Task<IEnumerable<AppointmentDTO>> GetAppointmentsByFilter(AppointmentFilter filter)
         {
             return (await _appointmentRepository.GetDetailedAppointments(x => (!filter.PatientId.HasValue || filter.PatientId.Value == x.PatientInfoId) &&
@@ -71,6 +284,49 @@ namespace Hospital.Application.Services
                 ((filter.From ?? DateTime.UtcNow).Date <= x.AppointmentDate.Date) &&
                 ((filter.To ?? DateTime.UtcNow).Date >= x.AppointmentDate.Date)
             )).Adapt<IEnumerable<AppointmentDTO>>();
+        }
+
+        public async Task<ServiceResult<string>> UpdateAppointment(int appointmenInfoId, CreateAppointmentDTO appointmentModel)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmenInfoId, []);
+            if (appointmentInfo == null)
+                return ServiceResult<string>.NotFound();
+
+            appointmentInfo.Update(appointmentModel.DoctorInfoId,
+                appointmentModel.PatientInfoId,
+                appointmentModel.AppointmentDate,
+                _currentUserService.UserId.Value
+            );
+
+            _appointmentRepository.Update(appointmentInfo);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+
+            return isSuccess ? ServiceResult<string>.Success("Updated appointment successfully")
+                : ServiceResult<string>.Failure("Failed to update appointment");
+        }
+
+        public async Task<IEnumerable<SkinAnalysisDTO>> GetSkinAnalysisByAppointmentId(int appointmentId)
+        {
+            var skinAnalysis = await _appointmentRepository.GetSkinAnalysesByAppointmentIdAsync(appointmentId);
+            return skinAnalysis.Adapt<IEnumerable<SkinAnalysisDTO>>();
+        }
+
+        public Task<ServiceResult<MedicationPrescribedDTO>> GetMedicationPrescribed(int appointmentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ServiceResult<AppointmentDTO>> GetAppointmentById(int appointmentInfoId)
+        {
+            var appointment = await _appointmentRepository.GetByIdAsync(appointmentInfoId, ["MedicalAssesment"]);
+            if (appointment == null)
+                return ServiceResult<AppointmentDTO>.NotFound();
+
+            var appointmentDto = appointment.Adapt<AppointmentDTO>();
+            return ServiceResult<AppointmentDTO>.Success(appointmentDto);
         }
     }
 }

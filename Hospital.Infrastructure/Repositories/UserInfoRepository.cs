@@ -1,5 +1,6 @@
 ﻿using Hospital.Domain.Aggregates.UserInfo;
 using Hospital.Domain.Interfaces;
+using Hospital.Domain.Models.Pagination;
 using Hospital.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,20 @@ namespace Hospital.Infrastructure.Repositories
             _context.Remove(entity);
         }
 
+        public async Task<bool> ExistsByEmail(string email)
+        {
+            return await _context.UserInfos
+                .Where(x => x.Email == email)
+                .AnyAsync();
+        }
+
+        public async Task<bool> ExistsByPhoneNumber(string phoneNumber)
+        {
+            return await _context.UserInfos
+                .Where(x => x.PhoneNumber == phoneNumber)
+                .AnyAsync();
+        }
+
         public async Task<IEnumerable<UserInfo>> GetAll()
         {
             return await _context.UserInfos
@@ -32,13 +47,33 @@ namespace Hospital.Infrastructure.Repositories
 
         public async Task<UserInfo?> GetById(int id)
         {
-            return await _context.UserInfos.FindAsync(id);
+            return await _context.UserInfos
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.UpdatedByUser)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<UserInfo?> GetByPhoneNumber(string phonenumber)
         {
             return await _context.UserInfos
                 .FirstOrDefaultAsync(x => x.PhoneNumber == phonenumber);
+        }
+
+        public async Task<PaginatedResult<UserInfo>> GetPaged(int pageNumber, int pageSize)
+        {
+            var query = _context.UserInfos
+                .AsQueryable();
+
+            var totalCount = query.Count();
+            var items = await query
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.UpdatedByUser)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .OrderBy(x => x.FirstName)
+                .ToListAsync();
+
+            return new PaginatedResult<UserInfo>(items, totalCount, pageNumber, pageSize);
         }
 
         public void Update(UserInfo entity)

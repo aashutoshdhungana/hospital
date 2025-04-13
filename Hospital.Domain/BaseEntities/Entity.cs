@@ -1,6 +1,6 @@
 ﻿namespace Hospital.Domain.BaseEntities
 {
-    public class Entity<IdType> : SoftDeletable
+    public class Entity<IdType>
     {
         protected Entity() { }
         public IdType Id { get; private set; }

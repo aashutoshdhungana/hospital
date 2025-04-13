@@ -57,6 +57,8 @@ namespace Hospital.Application.Services
             (
                 userInfo,
                 doctorModel.Specialization,
+                doctorModel.MedicalLicenseNumber,
+                doctorModel.PastExperienceInYears,
                 _currentUserService.UserId.Value
             );
 

@@ -3,6 +3,7 @@ using Hospital.Application.DTOs.UserInfo;
 using Hospital.Application.Interfaces;
 using Hospital.Application.Models;
 using Hospital.Domain.Aggregates.UserInfo;
+using Hospital.Domain.Models.Pagination;
 using Mapster;
 
 namespace Hospital.Application.Services
@@ -27,7 +28,7 @@ namespace Hospital.Application.Services
         }
         public async Task<ServiceResult<UserInfoDTO>> Create(CreateUserInfoDTO createUserInfoDTO)
         {
-            var validationResult = _validator.Validate(createUserInfoDTO);
+            var validationResult = await _validator.ValidateAsync(createUserInfoDTO);
             if (!validationResult.IsValid)
                 return ServiceResult<UserInfoDTO>.FromValidationResult(validationResult);
 
@@ -51,7 +52,10 @@ namespace Hospital.Application.Services
             _userInfoRepository.Add(userInfo);
 
             var isUserInfoCreated = await _userInfoRepository.UnitOfWork.CommitAsync();
-
+            if (!isUserInfoCreated) {
+                await _userInfoRepository.UnitOfWork.RollbackTransaction();
+                return ServiceResult<UserInfoDTO>.Failure("Failed to create user account");
+            }
             var identityResult = await _userIdentityService.RegisterUser(userInfo, $"P@aasword123");
             if (!identityResult.IsSuccess)
             {
@@ -90,14 +94,14 @@ namespace Hospital.Application.Services
                 .Success(userInfo.Adapt<UserInfoDTO>());
         }
 
-        public async Task<ServiceResult<IEnumerable<UserInfoDTO>>> GetAll()
+        public async Task<PaginatedResult<UserInfoDTO>> GetAll(PaginationParams paginationParams)
         {
-            var userInfos = await _userInfoRepository.GetAll();
-            return ServiceResult<IEnumerable<UserInfoDTO>>
-                .Success(userInfos.Adapt<IEnumerable<UserInfoDTO>>());
+            paginationParams.Validate();
+            var result = await _userInfoRepository.GetPaged(paginationParams.PageNumber, paginationParams.PageSize);
+            return result.Adapt<PaginatedResult<UserInfoDTO>>();
         }
 
-        public async Task<ServiceResult<UserInfoDTO>> Update(int userId, CreateUserInfoDTO userInfoDTO)
+        public async Task<ServiceResult<UserInfoDTO>> Update(int userId, UpdateUserInfoDTO userInfoDTO)
         {
             if ((_currentUserService.UserId ?? 0) <= 0)
                 return ServiceResult<UserInfoDTO>.Unauthorized();
@@ -107,6 +111,7 @@ namespace Hospital.Application.Services
                 return ServiceResult<UserInfoDTO>.NotFound();
 
             userInfo.Update(
+                userInfoDTO.Email,
                 userInfoDTO.FirstName,
                 userInfoDTO.MiddleName,
                 userInfoDTO.LastName,

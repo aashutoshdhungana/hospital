@@ -3,8 +3,11 @@ using Hospital.Domain.Aggregates.Doctor;
 
 namespace Hospital.Application.DTOs.Doctor
 {
-    public class ViewDoctorDTO : UserInfoDTO
+    public class ViewDoctorDTO
     {
         public Specialization Specialization { get; set; }
+        public string MedicalLicenseNumber { get; set; }
+        public double PastExperienceInYears { get; set; }
+        public UserInfoDTO UserInfo { get;  }
     }
 }

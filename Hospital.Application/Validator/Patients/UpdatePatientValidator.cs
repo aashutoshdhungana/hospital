@@ -1,15 +1,12 @@
 ﻿using FluentValidation;
 using Hospital.Application.DTOs.Patient;
-using Hospital.Application.DTOs.UserInfo;
 
 namespace Hospital.Application.Validator.Patients
 {
     public class UpdatePatientValidator : AbstractValidator<UpdatePatientDTO>
     {
-        public UpdatePatientValidator(IValidator<UpdateUserInfoDTO> userInfoValidator)
+        public UpdatePatientValidator()
         {
-            Include(userInfoValidator);
-
             RuleFor(x => x.EmergencyContactNumber)
                 .NotEmpty().WithMessage("Emergency contact number is required");
 

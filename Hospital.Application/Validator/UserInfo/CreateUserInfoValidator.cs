@@ -1,15 +1,26 @@
 ﻿using FluentValidation;
 using Hospital.Application.DTOs.UserInfo;
+using Hospital.Domain.Aggregates.UserInfo;
 
 namespace Hospital.Application.Validator.UserInfo
 {
     public class CreateUserInfoValidator : AbstractValidator<CreateUserInfoDTO>
     {
-        public CreateUserInfoValidator()
+        public CreateUserInfoValidator(
+            IUserInfoRepository userInfoRepository
+            )
         {
             RuleFor(x => x.Email)
                 .EmailAddress()
-                .WithMessage("Email address is invalid.");
+                .WithMessage("Email address is invalid.")
+                .MustAsync(async (email, cancellationToken) =>
+                {
+                    if (!string.IsNullOrEmpty(email))
+                        return true;
+                    var exist = await userInfoRepository.ExistsByEmail(email);
+                    return !exist;
+                })
+                .WithMessage("User with email already exists");
 
             RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required")
@@ -24,25 +35,27 @@ namespace Hospital.Application.Validator.UserInfo
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty().WithMessage("Phone number is required")
-                .Matches(@"^\+?[0-9]{7,15}$").WithMessage("Invalid phone number format");
+                .Matches(@"^\+?[0-9]{7,15}$").WithMessage("Invalid phone number format")
+                .MustAsync(async (phone, cancellationToken) =>
+                {
+                    var exist = await userInfoRepository.ExistsByPhoneNumber(phone);
+                    return !exist;
+                })
+                .WithMessage("User with phone number already exists");
 
             RuleFor(x => x.Gender)
                 .IsInEnum().WithMessage("Invalid gender selection");
 
             RuleFor(x => x.Street)
-                .NotEmpty().WithMessage("Street is required")
                 .MaximumLength(100).WithMessage("Street name cannot exceed 100 characters");
 
             RuleFor(x => x.City)
-                .NotEmpty().WithMessage("City is required")
                 .MaximumLength(50).WithMessage("City name cannot exceed 50 characters");
 
             RuleFor(x => x.State)
-                .NotEmpty().WithMessage("State is required")
                 .MaximumLength(50).WithMessage("State name cannot exceed 50 characters");
 
             RuleFor(x => x.Country)
-                .NotEmpty().WithMessage("Country is required")
                 .MaximumLength(50).WithMessage("Country name cannot exceed 50 characters");
 
             RuleFor(x => x.DateOfBirth)

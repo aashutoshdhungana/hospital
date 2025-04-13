@@ -1,4 +1,5 @@
-﻿using Hospital.Application.Interfaces;
+﻿using Hospital.Application.Constants;
+using Hospital.Application.Interfaces;
 using System.Security.Claims;
 
 namespace Hospital.Server.Services
@@ -14,8 +15,8 @@ namespace Hospital.Server.Services
         {
             get 
             {
-                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(x => x.Type == ClaimTypes.NameIdentifier);
-                if (userIdClaim == null || int.TryParse(userIdClaim.Value, out int userId))
+                var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(x => x.Type == ApplicationClaims.UserId);
+                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 {
                     return null;
                 }

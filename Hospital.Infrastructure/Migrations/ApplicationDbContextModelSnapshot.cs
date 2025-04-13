@@ -39,17 +39,8 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("integer");
-
                     b.Property<int>("DoctorInfoId")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("PatientInfoId")
                         .HasColumnType("integer");
@@ -65,11 +56,200 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedBy");
+
                     b.HasIndex("DoctorInfoId");
 
                     b.HasIndex("PatientInfoId");
 
+                    b.HasIndex("UpdatedBy");
+
                     b.ToTable("AppointmentInfos");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.MedicalAssesment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Advice")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("AppointmentInfoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ChiefComplaint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Diagnosis")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HistoryOfIllness")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentInfoId")
+                        .IsUnique();
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("MedicalAssesments");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.MedicationPrescibed", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("AppointmentInfoId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RxId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TimesPerDay")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentInfoId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("RxId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("MedicationPrescibed");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Analysis")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("AppointmentInfoId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsAbnormal")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SkinAnalysisTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentInfoId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("SkinAnalysisTypeId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("SkinAnalyses");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysisType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("SkinAnalysisTypes");
                 });
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Doctor.DoctorInfo", b =>
@@ -86,14 +266,12 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("MedicalLicenseNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
+                    b.Property<double>("PastExperienceInYears")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("Specialization")
                         .HasColumnType("integer");
@@ -108,6 +286,10 @@ namespace Hospital.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
 
                     b.HasIndex("UserInfoId");
 
@@ -128,12 +310,6 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("integer");
-
                     b.Property<string>("EmergencyContactNumber")
                         .IsRequired()
                         .HasColumnType("text");
@@ -141,9 +317,6 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<string>("EmergencyContactPerson")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("PatientId")
                         .ValueGeneratedOnAdd()
@@ -164,12 +337,16 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.HasAlternateKey("PatientId");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
                     b.HasIndex("UserInfoId");
 
                     b.ToTable("PatientInfos");
                 });
 
-            modelBuilder.Entity("Hospital.Domain.Aggregates.UserInfo.UserInfo", b =>
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Rx.RxInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -183,14 +360,48 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedBy")
+                    b.Property<int?>("UpdatedBy")
                         .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("RxInfos");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.UserInfo.UserInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasColumnType("text");
@@ -201,9 +412,6 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.Property<int>("Gender")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -224,7 +432,15 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("PhoneNumber");
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedBy");
 
                     b.ToTable("UserInfos");
                 });
@@ -435,6 +651,12 @@ namespace Hospital.Infrastructure.Migrations
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", b =>
                 {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Hospital.Domain.Aggregates.Doctor.DoctorInfo", "DoctorInfo")
                         .WithMany()
                         .HasForeignKey("DoctorInfoId")
@@ -447,57 +669,232 @@ namespace Hospital.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("DoctorInfo");
 
                     b.Navigation("PatientInfo");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.MedicalAssesment", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", "AppointmentInfo")
+                        .WithOne("MedicalAssesment")
+                        .HasForeignKey("Hospital.Domain.Aggregates.Appointment.MedicalAssesment", "AppointmentInfoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AppointmentInfo");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.MedicationPrescibed", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", "AppointmentInfo")
+                        .WithMany("MedicationPrescibed")
+                        .HasForeignKey("AppointmentInfoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.Rx.RxInfo", "RxInfo")
+                        .WithMany("MedicationPrescibed")
+                        .HasForeignKey("RxId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AppointmentInfo");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("RxInfo");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysis", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", "AppointmentInfo")
+                        .WithMany("SkinAnalyses")
+                        .HasForeignKey("AppointmentInfoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.Appointment.SkinAnalysisType", "SkinAnalysisType")
+                        .WithMany("SkinAnalyses")
+                        .HasForeignKey("SkinAnalysisTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AppointmentInfo");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("SkinAnalysisType");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysisType", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Doctor.DoctorInfo", b =>
                 {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UserInfo")
                         .WithMany()
                         .HasForeignKey("UserInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
 
                     b.Navigation("UserInfo");
                 });
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Patient.PatientInfo", b =>
                 {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UserInfo")
                         .WithMany()
                         .HasForeignKey("UserInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+
                     b.Navigation("UserInfo");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Rx.RxInfo", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.UserInfo.UserInfo", b =>
                 {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.OwnsOne("Hospital.Domain.Aggregates.UserInfo.Address", "Address", b1 =>
                         {
                             b1.Property<int>("UserInfoId")
                                 .HasColumnType("integer");
 
                             b1.Property<string>("City")
-                                .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("City");
 
                             b1.Property<string>("Country")
-                                .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("Country");
 
                             b1.Property<string>("State")
-                                .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("State");
 
                             b1.Property<string>("Street")
-                                .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("Street");
 
@@ -511,6 +908,10 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("Hospital.Infrastructure.Identity.Models.User", b =>
@@ -575,9 +976,28 @@ namespace Hospital.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", b =>
+                {
+                    b.Navigation("MedicalAssesment");
+
+                    b.Navigation("MedicationPrescibed");
+
+                    b.Navigation("SkinAnalyses");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysisType", b =>
+                {
+                    b.Navigation("SkinAnalyses");
+                });
+
             modelBuilder.Entity("Hospital.Domain.Aggregates.Patient.PatientInfo", b =>
                 {
                     b.Navigation("Appointments");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Rx.RxInfo", b =>
+                {
+                    b.Navigation("MedicationPrescibed");
                 });
 #pragma warning restore 612, 618
         }
