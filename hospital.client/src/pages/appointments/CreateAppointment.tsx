@@ -10,9 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
-import appointmentService from '../../services/appointmentService';
-import patientService, { Patient } from '../../features/Patient/services/patientService';
+import appointmentService from '@/features/Appointment/services/appointmentService';
+import patientService from '@/features/Patient/services/patientService';
 import { DateTimePicker } from '../../components/ui/date-time-picker';
+import Patient from '@/features/Patient/schema/PatientSchema';
 
 const CreateAppointment = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const CreateAppointment = () => {
 
     fetchPatients();
   }, []);
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -50,7 +51,7 @@ const CreateAppointment = () => {
 
     try {
       setIsLoading(true);
-      await appointmentService.createAppointment({
+      await appointmentService.create({
         patientInfoId: parseInt(formData.patientInfoId),
         doctorInfoId: parseInt(formData.doctorInfoId),
         appointmentDate: formData.appointmentDate.toISOString(),

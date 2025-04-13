@@ -1,18 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
-import appointmentService from "../../services/appointmentService";
+import appointmentService from "@/features/Appointment/services/appointmentService";
 import { Button } from "../../components/ui/button";
-import { Calendar, Grid, List  } from "lucide-react";
+import { Calendar, Edit, Eye, Grid, List, Trash } from "lucide-react";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { useNavigate } from "react-router-dom";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "../../components/ui/select";
 import { Input } from "../../components/ui/input";
+import { DeleteAppointmentConfirmationModal } from "@/features/Appointment/components/DeleteConfirmationModal";
+import { toast as Toast } from "sonner";
 
 interface Appointment {
   id: number;
@@ -27,11 +29,15 @@ const AppointmentList = () => {
   const [dateRange, setDateRange] = useState<
     { from: Date; to: Date } | undefined
   >();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const navigate = useNavigate();
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [appointmentIdToDelete, setAppointmentIdToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
 
   const loadAppointments = useCallback(async () => {
     try {
@@ -40,7 +46,7 @@ const AppointmentList = () => {
         from: dateRange?.from?.toISOString(),
         to: dateRange?.to?.toISOString(),
       };
-      const data = await appointmentService.getAppointments(filters);
+      const data = await appointmentService.getAll(filters);
       setAppointments(data);
     } catch (error) {
       console.error("Error loading appointments:", error);
@@ -54,17 +60,35 @@ const AppointmentList = () => {
   }, [loadAppointments]);
 
   // Filter appointments based on status and search query
-  const filteredAppointments = appointments.filter(appointment => 
+  const filteredAppointments = appointments.filter(appointment =>
     (statusFilter === 'All' || appointment.status === statusFilter) &&
-    (searchQuery === '' || 
+    (searchQuery === '' ||
       appointment.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       appointment.doctorName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+
+  // Handler for viewing an appointment
+  const handleView = (appointmentId: number) => {
+    navigate(`/appointment/detail/${appointmentId}`);
+  };
+
+  // Handler for editing an appointment
+  const handleCreateEdit = (mode: 'edit' | 'create', appointmentId?: number) => {
+    if (mode == 'edit') navigate(`/appointment/edit/${appointmentId}`);
+    else navigate(`/appointment/new`);
+  };
+
+  // Handler for deleting an appointment
+  const handleDelete = (appointmentId: number) => {
+    setIsDeletePopupOpen(true);
+    setAppointmentIdToDelete(appointmentId)
+  };
+
   // Render mobile table row
   const renderMobileRow = (appointment: Appointment) => (
-    <div 
-      key={appointment.id} 
+    <div
+      key={appointment.id}
       className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 mb-4"
     >
       <div className="flex justify-between items-start mb-2">
@@ -76,14 +100,13 @@ const AppointmentList = () => {
             Dr. {appointment.doctorName}
           </div>
         </div>
-        <span 
-          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-            appointment.status === "Confirmed"
+        <span
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${appointment.status === "Confirmed"
               ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
               : appointment.status === "Pending"
-              ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-              : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-          }`}
+                ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+            }`}
         >
           {appointment.status}
         </span>
@@ -92,8 +115,14 @@ const AppointmentList = () => {
         {format(new Date(appointment.appointmentDate), "PPpp")}
       </div>
       <div className="flex justify-end">
+        <Button variant="ghost" size="sm" onClick={() => handleView(appointment.id)}>
+          <Eye className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="sm">
-          View Details
+          <Edit className="h-4 w-4" onClick={() => handleCreateEdit('edit', appointment.id)} />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => handleDelete(appointment.id)}>
+          <Trash className="h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -113,20 +142,25 @@ const AppointmentList = () => {
       </td>
       <td className="whitespace-nowrap px-6 py-4">
         <span
-          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-            appointment.status === "Confirmed"
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${appointment.status === "Confirmed"
               ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
               : appointment.status === "Pending"
-              ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-              : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-          }`}
+                ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+            }`}
         >
           {appointment.status}
         </span>
       </td>
       <td className="whitespace-nowrap px-6 py-4">
-        <Button variant="ghost" size="sm">
-          View Details
+        <Button variant="ghost" size="sm" onClick={() => handleView(appointment.id)}>
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => handleCreateEdit('edit', appointment.id)}>
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => handleDelete(appointment.id)}>
+          <Trash className="h-4 w-4" />
         </Button>
       </td>
     </tr>
@@ -142,18 +176,18 @@ const AppointmentList = () => {
             <h1 className="text-2xl font-semibold w-full dark:text-white">
               Appointments
             </h1>
-            
+
             {/* Filters Container */}
             <div className="w-full flex flex-col sm:flex-row items-center gap-2">
-              <Input 
-                placeholder="Search appointments" 
+              <Input
+                placeholder="Search appointments"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full sm:flex-1 dark:bg-gray-700 dark:text-white dark:border-gray-600"
               />
-              
-              <Select 
-                value={statusFilter} 
+
+              <Select
+                value={statusFilter}
                 onValueChange={setStatusFilter}
               >
                 <SelectTrigger className="w-full sm:w-[180px] dark:bg-gray-700 dark:text-white dark:border-gray-600">
@@ -168,7 +202,7 @@ const AppointmentList = () => {
               </Select>
             </div>
           </div>
-          
+
           {/* Date and View Mode Section */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="w-full flex flex-col sm:flex-row items-center gap-2">
@@ -182,25 +216,25 @@ const AppointmentList = () => {
                   }}
                 />
               </div>
-              <Button 
-                onClick={() => navigate("/appointments/create")}
+              <Button
+                onClick={() => handleCreateEdit('create')}
                 className="w-full sm:w-auto"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 New Appointment
               </Button>
             </div>
-            
+
             {/* View Mode Toggles */}
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <Button 
+              <Button
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 onClick={() => setViewMode('list')}
                 size="icon"
               >
                 <List className="h-4 w-4" />
               </Button>
-              <Button 
+              <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 onClick={() => setViewMode('grid')}
                 size="icon"
@@ -228,8 +262,8 @@ const AppointmentList = () => {
                 <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
                     {['Patient', 'Doctor', 'Date & Time', 'Status', 'Actions'].map((header) => (
-                      <th 
-                        key={header} 
+                      <th
+                        key={header}
                         className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
                       >
                         {header}
@@ -254,6 +288,30 @@ const AppointmentList = () => {
             {filteredAppointments.map(renderMobileRow)}
           </div>
         </div>
+
+        {/* Delete Confirmation Popup */}
+        <DeleteAppointmentConfirmationModal
+          setIsOpen={setIsDeletePopupOpen}
+          isOpen={isDeletePopupOpen}
+          onDelete={async () => {
+            setIsDeleting(true);
+            try {
+              if (appointmentIdToDelete) {
+                await appointmentService.delete(appointmentIdToDelete);
+                loadAppointments();
+              }
+              Toast.success("Deleted user successfully");
+              setIsDeletePopupOpen(false);
+              setAppointmentIdToDelete(null);
+            } catch {
+              Toast.error("Failed to delete user");
+            } finally {
+              setIsDeleting(false);
+            }
+          }}
+          isDeleting={isDeleting}
+        />
+
       </div>
     </div>
   );
