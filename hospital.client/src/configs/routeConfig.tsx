@@ -11,7 +11,7 @@ const CreatePatient = lazy(() => import('../pages/patients/Create_backup'));
 const EditPatient = lazy(() => import('../pages/patients/Edit'));
 const AppointmentList = lazy(() => import('../pages/appointments/AppointmentList'));
 const CreateAppointment = lazy(() => import('../pages/appointments/CreateAppointment'));
-const EditAppointment = lazy(() => import('../pages/appointments/Edit'));
+const EditAppointment = lazy(() => import('../pages/appointments/EditAppointment'));
 const ViewAppointment = lazy(() => import('../pages/appointments/ViewAppointment'));
 const CreateMedicine = lazy(() => import('../pages/medicines/Create'));
 const EditMedicine = lazy(() => import('../pages/medicines/Edit'));
