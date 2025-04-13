@@ -9,7 +9,7 @@ namespace Hospital.Domain.Aggregates.Appointment
         public string Analysis { get; private set; }
         public bool IsAbnormal { get; private set; }
         public int AppointmentInfoId { get; private set; }
-        public AppointmentInfo? AppointmentInfo { get; private set; }
+        public AppointmentInfo AppointmentInfo { get; private set; }
 
         public SkinAnalysis()
         {

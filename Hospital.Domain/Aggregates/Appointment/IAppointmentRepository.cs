@@ -16,5 +16,9 @@ namespace Hospital.Domain.Aggregates.Appointment
         Task<MedicalAssesment?> GetAssessmentByAppointmentIdAsync(int appointmentId);
         Task<IEnumerable<SkinAnalysis>> GetSkinAnalysesByAppointmentIdAsync(int appointmentId);
         Task<IEnumerable<MedicationPrescibed>> GetMedicationsByAppointmentIdAsync(int appointmentId);
+        Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes();
+        void RemoveSkinAnalysis(SkinAnalysis skinAnalysis);
+        void RemoveMedicationPrescribed(MedicationPrescibed medicationPrescibed);
+
     }
 }

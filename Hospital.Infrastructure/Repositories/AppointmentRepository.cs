@@ -1,5 +1,4 @@
 ﻿using Hospital.Domain.Aggregates.Appointment;
-using Hospital.Domain.Aggregates.Patient;
 using Hospital.Domain.Interfaces;
 using Hospital.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +76,21 @@ namespace Hospital.Infrastructure.Repositories
             return await _context.MedicationPrescibed.Include(x => x.RxInfo)
                 .Where(x => x.AppointmentInfoId == appointmentId)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes()
+        {
+            return await _context.SkinAnalysisTypes.ToListAsync();
+        }
+
+        public void RemoveSkinAnalysis(SkinAnalysis skinAnalysis)
+        {
+            _context.SkinAnalyses.Remove(skinAnalysis);
+        }
+
+        public void RemoveMedicationPrescribed(MedicationPrescibed medicationPrescibed)
+        {
+            _context.MedicationPrescibed.Remove(medicationPrescibed);
         }
     }
 }
