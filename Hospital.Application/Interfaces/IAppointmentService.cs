@@ -17,14 +17,15 @@ namespace Hospital.Application.Interfaces
         Task<IEnumerable<AppointmentDTO>> GetAppointmentsByFilter(AppointmentFilter filter);
         Task<ServiceResult<string>> AddMedicalAssessmentAsync(int appointmentId, CreateUpdateMedicalAssesmentDTO assessment);
 
-        Task<ServiceResult<SkinAnalysisDTO>> GetSkinAnalysisByAppointmentId(int appointmentId);
+        Task<IEnumerable<SkinAnalysisDTO>> GetSkinAnalysisByAppointmentId(int appointmentId);
         Task<ServiceResult<string>> AddSkinAnalysisAsync(int appointmentId, CreateUpdateSkinAnalysisDTO analysis);
         Task<ServiceResult<string>> RemoveSkinAnalysisAsync(int appointmentId, int analysisId);
         Task<ServiceResult<string>> UpdateSkinAnalysisAsync(int appointmentId, int analysisId, CreateUpdateSkinAnalysisDTO analysis);
 
-        Task<ServiceResult<MedicationPrescribedDTO>> GetMedicationPrescribed(int appointmentId);
+        Task<IEnumerable<MedicationPrescribedDTO>> GetMedicationPrescribed(int appointmentId);
         Task<ServiceResult<string>> AddMedicationAsync(int appointmentId, CreateUpdateMedicationPrescribedDTO medication);
         Task<ServiceResult<string>> RemoveMedicationAsync(int appointmentId, int medicationId);
         Task<ServiceResult<string>> UpdateMedicationAsync(int appointmentId, int medicationId, CreateUpdateMedicationPrescribedDTO medication);
+        Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes();
     }
 }

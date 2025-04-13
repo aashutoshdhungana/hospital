@@ -140,9 +140,9 @@ namespace Hospital.Application.Services
             if (medication == null)
                 return ServiceResult<string>.NotFound();
 
-            appointmentInfo.RemoveMedication(medication);
-
+            _appointmentRepository.RemoveMedicationPrescribed(medication);
             _appointmentRepository.Update(appointmentInfo);
+            appointmentInfo.RemoveMedication(medication);
             var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
 
             return isSuccess ? ServiceResult<string>.Success("Successfully removed the medication")
@@ -211,6 +211,7 @@ namespace Hospital.Application.Services
             if (analysis == null)
                 return ServiceResult<string>.NotFound();
 
+            _appointmentRepository.RemoveSkinAnalysis(analysis);
             appointmentInfo.RemoveSkinAnalysis(analysis);
             _appointmentRepository.Update(appointmentInfo);
             var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
@@ -286,14 +287,24 @@ namespace Hospital.Application.Services
             )).Adapt<IEnumerable<AppointmentDTO>>();
         }
 
-        public async Task<ServiceResult<string>> UpdateAppointment(int appointmenInfoId, CreateAppointmentDTO appointmentModel)
+        public async Task<ServiceResult<string>> UpdateAppointment(int appointmentInfoId, CreateAppointmentDTO appointmentModel)
         {
             if (!_currentUserService.UserId.HasValue)
                 return ServiceResult<string>.Unauthorized();
 
-            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmenInfoId, []);
+            var appointmentInfo = await _appointmentRepository.GetByIdAsync(appointmentInfoId, ["MedicationPrescibed", "SkinAnalyses", "MedicalAssesment"]);
             if (appointmentInfo == null)
                 return ServiceResult<string>.NotFound();
+
+            if (appointmentInfo.Status == AppointmentStatus.Completed)
+            {
+                return ServiceResult<string>.Failure("Completed appointment cannot be updated");
+            }
+
+            if (appointmentInfo.SkinAnalyses.Any() || appointmentInfo.MedicationPrescibed.Any() || appointmentInfo.MedicalAssesment != null)
+            {
+                return ServiceResult<string>.Failure("Appointment cannot be updated as it contains related data");
+            }
 
             appointmentInfo.Update(appointmentModel.DoctorInfoId,
                 appointmentModel.PatientInfoId,
@@ -314,19 +325,25 @@ namespace Hospital.Application.Services
             return skinAnalysis.Adapt<IEnumerable<SkinAnalysisDTO>>();
         }
 
-        public Task<ServiceResult<MedicationPrescribedDTO>> GetMedicationPrescribed(int appointmentId)
+        public async Task<IEnumerable<MedicationPrescribedDTO>> GetMedicationPrescribed(int appointmentId)
         {
-            throw new NotImplementedException();
+            var medicationPrescribed = await _appointmentRepository.GetMedicationsByAppointmentIdAsync(appointmentId);
+            return medicationPrescribed.Adapt<IEnumerable<MedicationPrescribedDTO>>();
         }
 
         public async Task<ServiceResult<AppointmentDTO>> GetAppointmentById(int appointmentInfoId)
         {
-            var appointment = await _appointmentRepository.GetByIdAsync(appointmentInfoId, ["MedicalAssesment"]);
+            var appointment = await _appointmentRepository.GetByIdAsync(appointmentInfoId, ["MedicalAssesment", "DoctorInfo.UserInfo", "PatientInfo.UserInfo"]);
             if (appointment == null)
                 return ServiceResult<AppointmentDTO>.NotFound();
 
             var appointmentDto = appointment.Adapt<AppointmentDTO>();
             return ServiceResult<AppointmentDTO>.Success(appointmentDto);
+        }
+
+        public async Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes()
+        {
+            return await _appointmentRepository.GetSkinAnalysisTypes();
         }
     }
 }
