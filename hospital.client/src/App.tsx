@@ -6,6 +6,9 @@ import  RouteConfig  from "./configs/routeConfig"
 import { Suspense } from "react"
 import Loading from "./components/Loading/Loading"
 import { Toaster } from "./components/ui/sonner"
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'; 
+ModuleRegistry.registerModules([AllCommunityModule]);
+
 const App = ()=> {
 
   const router = createBrowserRouter(RouteConfig)

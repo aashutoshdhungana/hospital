@@ -12,7 +12,7 @@ const EditPatient = lazy(() => import('../pages/patients/Edit'));
 const AppointmentList = lazy(() => import('../pages/appointments/AppointmentList'));
 const CreateAppointment = lazy(() => import('../pages/appointments/CreateAppointment'));
 const EditAppointment = lazy(() => import('../pages/appointments/Edit'));
-const ViewAppointment = lazy(() => import('../pages/appointments/ViewAppointment'));
+const DetailForm = lazy(() => import('../pages/appointments/DetailForm'));
 const CreateMedicine = lazy(() => import('../pages/medicines/Create'));
 const EditMedicine = lazy(() => import('../pages/medicines/Edit'));
 const MedicineList = lazy(() => import('../pages/medicines/List'));
@@ -80,7 +80,7 @@ const RouteConfig: RouteObject[] = [
                     {
                         path: '/appointment/detail/:id',
                         element: <ProtectedRoute requiredPermissions={['appointments.view']} />,
-                        children: [{index: true, element: <ViewAppointment />}],
+                        children: [{index: true, element: <DetailForm />}],
                     },
                     {
                         path: '/appointment/edit/:id',

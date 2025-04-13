@@ -131,7 +131,7 @@ namespace Hospital.Server.Controllers
 
         #endregion
 
-        [HttpGet("/skin-analysis-types")]
+        [HttpGet("/api/skin-analysis-types")]
         public async Task<IActionResult> GetSkinAnalysisTypes()
         {
             return Ok(await _appointmentService.GetSkinAnalysisTypes());
