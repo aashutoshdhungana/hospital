@@ -1,5 +1,5 @@
 // src/components/AppointmentForm.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +59,8 @@ export default function AppointmentForm() {
 
     const [editingSkin, setEditingSkin] = useState<Partial<SkinAnalysis>>({});
     const [editingMed, setEditingMed] = useState<Partial<Medication>>({});
-
+    const [patientName, setPatientName] = useState('');
+    const [doctorName, setDoctorName] = useState('');
     const { id } = useParams();
 
     const getSkinAnalysisRowData = async () => {
@@ -92,6 +93,8 @@ export default function AppointmentForm() {
             setHistoryOfIllness(historyOfIllness)
             setDiagnosis(diagnosis)
             setAdvice(advice);
+            setPatientName(response.data.patientName);
+            setDoctorName(response.data.doctorName);
         } catch {
             toast.error('Failed to load medication data')
         }
@@ -312,7 +315,7 @@ export default function AppointmentForm() {
     return (
         <Card className="shadow-md">
             <CardHeader>
-                <CardTitle>Patient Assessment</CardTitle>
+                <CardTitle>Medical Assessment {patientName ? `for ${patientName}` : null} {doctorName ? `by ${doctorName}` : ''}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-4">

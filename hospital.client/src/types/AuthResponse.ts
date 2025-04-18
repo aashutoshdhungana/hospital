@@ -1,4 +1,4 @@
-import { UserInfo } from "./UserInfo";
+import { UserInfo } from "@/features/UserInfo/schemas/UserInfo";
 
 export interface AuthResponse {
 	userInfo: UserInfo;

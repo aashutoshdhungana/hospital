@@ -15,9 +15,9 @@ namespace Hospital.Application.Validator.Appointments
                 .GreaterThanOrEqualTo(0)
                 .WithMessage("Patient is required");
 
-            RuleFor(x => x.AppointmentDate)
-                .GreaterThanOrEqualTo(DateTime.UtcNow)
-                .WithMessage("Appointment date can not be in the past");
+            RuleFor(x => x.AppointmentDate);
+                //.GreaterThanOrEqualTo(DateTime.UtcNow)
+                //.WithMessage("Appointment date can not be in the past");
         }
     }
 }

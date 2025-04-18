@@ -7,11 +7,11 @@ import Unauthorized from "../pages/Unauthorized";
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const AllPatients = lazy(() => import('../pages/patients/List'));
-const CreatePatient = lazy(() => import('../pages/patients/Create_backup'));
+const CreatePatient = lazy(() => import('../pages/patients/Create'));
 const EditPatient = lazy(() => import('../pages/patients/Edit'));
 const AppointmentList = lazy(() => import('../pages/appointments/AppointmentList'));
 const CreateAppointment = lazy(() => import('../pages/appointments/CreateAppointment'));
-const EditAppointment = lazy(() => import('../pages/appointments/Edit'));
+const EditAppointment = lazy(() => import('../pages/appointments/EditAppointment'));
 const DetailForm = lazy(() => import('../pages/appointments/DetailForm'));
 const CreateMedicine = lazy(() => import('../pages/medicines/Create'));
 const EditMedicine = lazy(() => import('../pages/medicines/Edit'));

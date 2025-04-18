@@ -4,7 +4,23 @@ import Patient from '../schema/PatientSchema';
 const patientService = {
   getPatients: async (): Promise<Patient[]> => {
     const response = await axios.get('/api/Patient');
-    return response.data;
+  
+    return response.data.map((x: any) => ({
+      id: x.id,
+      firstName: x.userInfo.firstName,
+      middleName: x.userInfo.middleName,
+      lastName: x.userInfo.lastName,
+      email: x.userInfo.email,
+      phoneNumber: x.userInfo.phoneNumber,
+      emergencyContactPerson: x.emergencyContactPerson,
+      emergencyContactNumber: x.emergencyPhoneNumber,
+      gender: x.userInfo.gender,
+      street: x.userInfo.street,
+      city: x.userInfo.city,
+      state: x.userInfo.state,
+      country: x.userInfo.country,
+      dateOfBirth: x.userInfo.dateOfBirth,
+    }));
   },
 
   createPatient: async (patient: Patient): Promise<Patient> => {
@@ -26,7 +42,24 @@ const patientService = {
 
   getPatientById: async (id: number): Promise<Patient> => {
     const response = await axios.get(`/api/Patient/${id}`);
-    return response.data;
+    const x = response.data;
+  
+    return {
+      id: x.id,
+      firstName: x.userInfo.firstName,
+      middleName: x.userInfo.middleName,
+      lastName: x.userInfo.lastName,
+      email: x.userInfo.email,
+      phoneNumber: x.userInfo.phoneNumber,
+      emergencyContactPerson: x.emergencyContactPerson,
+      emergencyContactNumber: x.emergencyPhoneNumber,
+      gender: x.userInfo.gender,
+      street: x.userInfo.street,
+      city: x.userInfo.city,
+      state: x.userInfo.state,
+      country: x.userInfo.country,
+      dateOfBirth: x.userInfo.dateOfBirth,
+    };
   },
 };
 

@@ -10,34 +10,6 @@ import Loading from "../components/Loading/Loading";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const mockResponse ={
-	status: 200,
-	data: {
-		"userInfo": {
-			"id": 1,
-			"email": "admin@hospital.com",
-			"firstName": "Hospital123",
-			"middleName": "",
-			"lastName": "Admin",
-			"phoneNumber": "1234567890",
-			"gender": 0,
-			"street": "123 Admin Street",
-			"city": "Admin City Test",
-			"state": "Admin State",
-			"country": "USA",
-			"dateOfBirth": "2025-04-08T00:00:00",
-			"createdBy": "",
-			"createdAt": "2025-04-12T11:15:36.15795Z",
-			"updatedBy": "Hospital123  Admin",
-			"updatedAt": "2025-04-12T21:40:47.902711Z"
-		},
-		"permissions": [],
-		"roles": [
-			"Admin"
-		]
-	}
-}
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [user, setUser] = useState<UserInfo | null>(null);
 	const [permissions, setPermissions] = useState<string[]>([]);
@@ -49,8 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				// const response = await api.get<AuthResponse>("/api/login/checkauth");
-				const response = mockResponse
+				const response = await api.get<AuthResponse>("/api/login/checkauth");
 				if (response.data && response.data.userInfo) {
 					setUser(response.data.userInfo);
 					setPermissions(response.data.permissions || []);
@@ -88,8 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			
 			console.log("Attempting login with:", { username: loginData.username, rememberMe: loginData.rememberMe });
 			
-			// const response = await api.post<AuthResponse>("/api/login", loginData);
-			const response = mockResponse;
+			const response = await api.post<AuthResponse>("/api/login", loginData);
 			
 			if (response.data && response.data.userInfo) {
 				setUser(response.data.userInfo);

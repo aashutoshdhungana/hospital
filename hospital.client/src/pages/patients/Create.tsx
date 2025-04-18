@@ -1,4 +1,4 @@
-import PatientForm from "../../features/Patient/components/PatientForm"
+import PatientForm from "../../features/Patient/components/CreatePatientForm"
 
 const Create = () => {
     return (

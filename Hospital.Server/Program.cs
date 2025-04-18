@@ -50,7 +50,7 @@ namespace Hospital.Server
                 options.Cookie.Name = "Hospital.Auth";
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Lax;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
                 options.ExpireTimeSpan = TimeSpan.FromHours(24);
                 options.SlidingExpiration = true;
                 options.Events.OnRedirectToLogin = context =>
@@ -99,7 +99,7 @@ namespace Hospital.Server
                 });
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

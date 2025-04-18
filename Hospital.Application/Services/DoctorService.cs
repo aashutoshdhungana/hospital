@@ -71,7 +71,7 @@ namespace Hospital.Application.Services
                 return ServiceResult<int>.Failure("Failed to add doctor");
             }
 
-            var roleResult = await _userIdentityService.AddUserToRole(userInfo.PhoneNumber, ApplicationRoles.Admin);
+            var roleResult = await _userIdentityService.AddUserToRole(userInfo.PhoneNumber, ApplicationRoles.Doctor);
             if (!roleResult.IsSuccess)
             {
                 await _doctorRepository.UnitOfWork.RollbackTransaction();

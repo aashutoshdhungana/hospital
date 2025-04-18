@@ -35,11 +35,19 @@ namespace Hospital.Server.Controllers
             return Ok(allUsers);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [CheckPermission(Permissions.ViewUser)]
         public async Task<ActionResult> GetById(int id)
         {
             var result = await _userInfoService.Get(id);
+            return HandleServiceResult(result);
+        }
+
+        [HttpGet("username/{username}")]
+        [CheckPermission(Permissions.ViewUser)]
+        public async Task<ActionResult> GetById(string username)
+        {
+            var result = await _userInfoService.GetByUsername(username);
             return HandleServiceResult(result);
         }
 

@@ -101,6 +101,14 @@ namespace Hospital.Application.Services
             return result.Adapt<PaginatedResult<UserInfoDTO>>();
         }
 
+        public async Task<ServiceResult<UserInfoDTO>> GetByUsername(string username)
+        {
+            var userInfo = await _userInfoRepository.GetByPhoneNumber(username);
+            if (userInfo == null)
+                return ServiceResult<UserInfoDTO>.NotFound();
+            return ServiceResult<UserInfoDTO>.Success(userInfo.Adapt<UserInfoDTO>());
+        }
+
         public async Task<ServiceResult<UserInfoDTO>> Update(int userId, UpdateUserInfoDTO userInfoDTO)
         {
             if ((_currentUserService.UserId ?? 0) <= 0)

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Gender } from "../../../types/UserInfo";
 
 const PatientFormSchema = z.object({
   firstName: z

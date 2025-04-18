@@ -1,7 +1,10 @@
 ﻿using Hospital.Application.DTOs.Appointment;
+using Hospital.Application.DTOs.Doctor;
+using Hospital.Application.DTOs.Patient;
 using Hospital.Application.DTOs.RxInfo;
 using Hospital.Application.DTOs.UserInfo;
 using Hospital.Domain.Aggregates.Appointment;
+using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Rx;
 using Hospital.Domain.Aggregates.UserInfo;
 using Mapster;
@@ -21,6 +24,15 @@ namespace Hospital.Application.MapsterConfig
                 .Map(dest => dest.Gender, src => src.Gender)
                 .Map(dest => dest.CreatedBy, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : "")
                 .Map(dest => dest.UpdatedBy, src => src.UpdatedByUser != null ? src.UpdatedByUser.FullName : "");
+
+            TypeAdapterConfig<PatientInfoDTO, PatientInfoDTO>
+                .NewConfig()
+                .Map(dest => dest.UserInfo, src => src.UserInfo);
+
+            TypeAdapterConfig<DoctorInfo, ViewDoctorDTO>
+                .NewConfig()
+                .Map(dest => dest.UserInfo, src => src.UserInfo);
+
 
             TypeAdapterConfig<RxInfo, RxInfoDTO>
                 .NewConfig()

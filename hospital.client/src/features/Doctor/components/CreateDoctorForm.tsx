@@ -1,0 +1,250 @@
+// CreateDoctorForm.tsx
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { phoneSchema, createUserSchema, doctorSchema, Gender, Specialization } from "../schemas/CreateDoctorSchema";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { specializations } from "../schemas/CreateDoctorSchema";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+export default function CreateDoctorForm() {
+	const [step, setStep] = useState<"phone" | "user" | "doctor">("phone");
+	const [userId, setUserId] = useState<number | null>(null);
+	
+	const navigate = useNavigate();
+
+	const phoneForm = useForm({
+		resolver: zodResolver(phoneSchema),
+		defaultValues: { phoneNumber: "" },
+	});
+
+	const userForm = useForm({
+		resolver: zodResolver(createUserSchema),
+		defaultValues: {
+			firstName: "",
+			middleName: "",
+			lastName: "",
+			email: "",
+			phoneNumber: "",
+			gender: 0,
+			street: "",
+			city: "",
+			state: "",
+			country: "",
+			dateOfBirth: "",
+		},
+	});
+
+	const doctorForm = useForm({
+		resolver: zodResolver(doctorSchema),
+		defaultValues: {
+			medicalLicenseNumber: "",
+			pastExperienceInYears: 0,
+			specialization: Specialization.Anesthesiologist,
+		},
+	});
+
+	const checkPhoneNumber = async (data: any) => {
+		try {
+			const res = await axios.get(`/api/userInfo/username/${data.phoneNumber}`);
+			if (res.data?.id) {
+				setUserId(res.data.id);
+				setStep("doctor");
+				toast.info("User already exists, proceed to create doctor profile.")
+
+			} else {
+				userForm.setValue("phoneNumber", data.phoneNumber);
+				setStep("user");
+			}
+		} catch {
+			userForm.setValue("phoneNumber", data.phoneNumber);
+			toast.error("Error! Please try again.");
+		}
+	};
+
+	const createUser = async (data: any) => {
+		try {
+			const res = await axios.post("/api/userInfo", data);
+			setUserId(res.data.id);
+			setStep("doctor");
+			toast.success("User created successfully!");
+		} catch (error) {
+			toast.error("Error! Please try again.");
+		}
+	};
+
+	const createDoctor = async (data: any) => {
+		if (!userId) return;
+		try {
+			await axios.post("/api/userInfo", { ...data, id: userId });
+			toast.success("Doctor profile created successfully!");
+			navigate("/doctors");
+		} catch (error) {
+			toast.error("Error! Please try again.");
+		}
+	};
+
+	return (
+		<div className="max-w-xl mx-auto mt-10 space-y-6">
+			{step === "phone" && (
+				<Form {...phoneForm}>
+					<form onSubmit={phoneForm.handleSubmit(checkPhoneNumber)} className="space-y-4">
+						<FormField
+							control={phoneForm.control}
+							name="phoneNumber"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone Number</FormLabel>
+									<FormControl>
+										<Input placeholder="Enter phone number" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<Button type="submit">Next</Button>
+					</form>
+				</Form>
+			)}
+
+			{step === "user" && (
+				<Form {...userForm}>
+					<form onSubmit={userForm.handleSubmit(createUser)} className="space-y-4">
+						<FormField name="firstName" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>First Name</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="middleName" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Middle Name</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="lastName" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Last Name</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="email" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email</FormLabel>
+								<FormControl><Input type="email" {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="phoneNumber" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Phone Number</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="gender" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Gender</FormLabel>
+								<FormControl>
+									<Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+										<SelectTrigger><SelectValue /></SelectTrigger>
+										<SelectContent>
+											<SelectItem value={Gender.Male.toString()}>Male</SelectItem>
+											<SelectItem value={Gender.Female.toString()}>Female</SelectItem>
+											<SelectItem value={Gender.Other.toString()}>Other</SelectItem>
+										</SelectContent>
+									</Select>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="street" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Street</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="city" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>City</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="state" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>State</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="country" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Country</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="dateOfBirth" control={userForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Date of Birth</FormLabel>
+								<FormControl><Input type="date" {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<Button type="submit">Create User</Button>
+					</form>
+				</Form>
+			)}
+
+			{step === "doctor" && (
+				<Form {...doctorForm}>
+					<form onSubmit={doctorForm.handleSubmit(createDoctor)} className="space-y-4">
+						<FormField name="medicalLicenseNumber" control={doctorForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Medical License Number</FormLabel>
+								<FormControl><Input {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="pastExperienceInYears" control={doctorForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Past Experience (in years)</FormLabel>
+								<FormControl><Input type="number" min={0} {...field} /></FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<FormField name="specialization" control={doctorForm.control} render={({ field }) => (
+							<FormItem>
+								<FormLabel>Specialization</FormLabel>
+								<FormControl>
+								<Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+										<SelectTrigger><SelectValue /></SelectTrigger>
+										<SelectContent>
+										{specializations.map((spec) => (
+											<SelectItem key={spec.value} value={spec.value.toString()}>
+												{spec.label}
+											</SelectItem>
+										))}
+										</SelectContent>
+									</Select>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)} />
+						<Button type="submit">Create Doctor</Button>
+					</form>
+				</Form>
+			)}
+		</div>
+	);
+}

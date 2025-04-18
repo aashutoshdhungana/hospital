@@ -8,6 +8,7 @@ namespace Hospital.Domain.Aggregates.UserInfo
         void Add(UserInfo entity);
         void Update(UserInfo entity);
         Task<UserInfo?> GetById(int id);
+        Task<UserInfo?> GetByPhoneNumber(string phoneNumber);
         Task<IEnumerable<UserInfo>> GetAll();
         Task<PaginatedResult<UserInfo>> GetPaged(int pageNumber, int pageSize);
         void Delete(UserInfo entity);

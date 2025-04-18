@@ -10,8 +10,9 @@ import {
 } from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
 import { Plus, User } from 'lucide-react';
-import patientService, { Patient, Gender } from '../../features/Patient/services/patientService';
-
+import patientService from '../../features/Patient/services/patientService';
+import Patient from '@/features/Patient/schema/PatientSchema';
+import { Gender } from '@/features/UserInfo/schemas/UserInfo';
 const PatientsList = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,7 @@ const PatientsList = () => {
           <h1 className="text-2xl font-semibold">Patients</h1>
           <p className="text-muted-foreground">Manage patient records</p>
         </div>
-        <Button onClick={() => navigate('/patients/new')}>
+        <Button onClick={() => navigate('/patient/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Patient
         </Button>

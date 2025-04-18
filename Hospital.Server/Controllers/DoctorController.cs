@@ -35,9 +35,9 @@ namespace Hospital.Server.Controllers
 
         [HttpPost]
         [CheckPermission(Permissions.CreateDoctor)]
-        public async Task<ActionResult<int>> Create(int userInfoId, CreateDoctorDTO doctorDTO)
+        public async Task<ActionResult<int>> Create([FromBody]CreateDoctorDTO doctorDTO)
         {
-            var result = await _doctorService.CreateDoctor(userInfoId, doctorDTO);
+            var result = await _doctorService.CreateDoctor(doctorDTO.UserInfoId, doctorDTO);
             return HandleServiceResult(result);
         }
 

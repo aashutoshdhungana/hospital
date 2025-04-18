@@ -11,5 +11,6 @@ namespace Hospital.Application.Interfaces
         Task<ServiceResult<UserInfoDTO>> Get(int id);
         Task<ServiceResult<UserInfoDTO>> Delete(int id);
         Task<PaginatedResult<UserInfoDTO>> GetAll(PaginationParams paginationParams);
+        Task<ServiceResult<UserInfoDTO>> GetByUsername(string username);
     }
 }
