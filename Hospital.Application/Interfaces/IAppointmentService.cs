@@ -1,4 +1,5 @@
 ﻿using Hospital.Application.DTOs.Appointment;
+using Hospital.Application.DTOs.AppointmentDiagnosis;
 using Hospital.Application.DTOs.MedicalAssesment;
 using Hospital.Application.DTOs.MedicationPrescribed;
 using Hospital.Application.DTOs.SkinAnalysis;
@@ -27,5 +28,11 @@ namespace Hospital.Application.Interfaces
         Task<ServiceResult<string>> RemoveMedicationAsync(int appointmentId, int medicationId);
         Task<ServiceResult<string>> UpdateMedicationAsync(int appointmentId, int medicationId, CreateUpdateMedicationPrescribedDTO medication);
         Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes();
+
+
+        Task<IEnumerable<AppointmentDiagnosisDTO>> GetAppointmentDiagnosis(int appointmentId);
+        Task<ServiceResult<string>> AddAppointmentDiagnosis(int appointmentId, CreateUpdateAppointmentDiagnosis appointmentDiagnosis);
+        Task<ServiceResult<string>> UpdateAppointmentDiagnosis(int appointmentId, int appointmentDiagnosisId, CreateUpdateAppointmentDiagnosis appointmentDiagnosis);
+        Task<ServiceResult<string>> RemoveAppointmentDiagnosis(int appointmentId, int appointmentDiagnosisId);
     }
 }

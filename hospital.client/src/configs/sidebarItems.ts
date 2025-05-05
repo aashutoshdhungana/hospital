@@ -70,6 +70,16 @@ const sideBarItems: SidebarItem[] = [
             { path: '/users', label: 'All Users', permission: 'users.view' },
             { path: '/user/new', label: 'Create', permission: 'users.create' }
         ]
+    },
+    {
+        path: '/diagnosis',
+        label: 'Diagnosis',
+        icon: Stethoscope,
+        permission: 'diagnosis.view',
+        submenu: [
+            { path: '/diagnosis', label: 'All Diagnosis', permission: 'diagnosis.view' },
+            { path: '/diagnosis/new', label: 'Create', permission: 'diagnosis.create' }
+        ]
     }
 ];
 

@@ -22,6 +22,11 @@ namespace Hospital.Infrastructure.Data.ModelConfigurations
                 .WithOne(x => x.AppointmentInfo)
                 .HasForeignKey(x => x.AppointmentInfoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(x => x.DiagnosisInfos)
+                .WithOne(x => x.AppointmentInfo)
+                .HasForeignKey(x => x.ApointmentInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 

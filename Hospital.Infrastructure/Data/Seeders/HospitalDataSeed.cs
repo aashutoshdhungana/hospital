@@ -24,28 +24,56 @@ namespace Hospital.Infrastructure.Data.Seeders
             // Apply pending migrations if any
             await context.Database.MigrateAsync();
 
-            // Create roles if they don't exist
-            await SeedRolesAndPermissionsAsync(roleManager);
+            //// Create roles if they don't exist
+            //await SeedRolesAndPermissionsAsync(roleManager);
 
-            // Seed admin user
-            var adminUser = await SeedAdminUser(userManager, context);
-
-            var receptionist = await SeedReceptionistUser(userManager, context, adminUser.UserInfoId);
+            //// Seed admin user
+            //var adminUser = await SeedAdminUser(userManager, context);
+            //await SeedSkinAnalysis(context);
+            //var receptionist = await SeedReceptionistUser(userManager, context, adminUser.UserInfoId);
             // Seed doctors with specializations
-            var doctors = await SeedDoctors(userManager, context, adminUser.UserInfoId);
+            //var doctors = await SeedDoctors(userManager, context, adminUser.UserInfoId);
 
-            await SeedPharmacistUser(userManager, context, adminUser.UserInfoId);
+            //await SeedPharmacistUser(userManager, context, adminUser.UserInfoId);
             // Seed patients
-            var patients = await SeedPatients(userManager, context, adminUser.UserInfoId);
+            //var patients = await SeedPatients(userManager, context, adminUser.UserInfoId);
 
             // Seed appointments
-            await SeedAppointments(context, doctors, patients, adminUser.UserInfoId);
+            //await SeedAppointments(context, doctors, patients, adminUser.UserInfoId);
 
         }
 
+        public static async Task SeedSkinAnalysis(ApplicationDbContext context)
+        {
+            if (!context.SkinAnalysisTypes.Any())
+            {
+                var createdBy = 1;
+
+                var types = new List<SkinAnalysisType>
+            {
+                new("Sebum", createdBy),
+                new("Pores", createdBy),
+                new("Spot", createdBy),
+                new("Wrinkles", createdBy),
+                new("Acne", createdBy),
+                new("Blackhead", createdBy),
+                new("Darkcircle", createdBy),
+                new("Skin Tone", createdBy),
+                new("Skin Sensitivity", createdBy),
+                new("UV Spot", createdBy),
+                new("Deep Pigment", createdBy),
+                new("Deep Layer Skin Acne UV", createdBy),
+                new("Skin Collagen Loss Test", createdBy),
+                new("3D Simulation", createdBy),
+                new("Skin Age", createdBy)
+            };
+
+                await context.SkinAnalysisTypes.AddRangeAsync(types);
+                await context.SaveChangesAsync();
+            }
+        }
         public static async Task SeedRolesAndPermissionsAsync(RoleManager<IdentityRole> roleManager)
         {
-            // Define roles
             string[] roleNames = { ApplicationRoles.Admin, 
                 ApplicationRoles.Doctor, 
                 ApplicationRoles.Receptionist, 
@@ -62,58 +90,58 @@ namespace Hospital.Infrastructure.Data.Seeders
                 }
             }
 
-            //// Assign permissions to Doctor role
-            //var doctorRole = await roleManager.FindByNameAsync(ApplicationRoles.Doctor);
-            //await AddPermissionsToRole(roleManager, doctorRole, new[]
-            //{
-            //    Permissions.ViewPatient,
-            //    Permissions.MyAppointments,
-            //    Permissions.EditAppointment,
-            //    Permissions.CreatePatientHistory,
-            //    Permissions.ViewPatientHistory,
-            //    Permissions.EditPatientHistory,
-            //    Permissions.DeletePatientHistory,
-            //    Permissions.CreateSkinAnalysis,
-            //    Permissions.ViewSkinAnalysis,
-            //    Permissions.EditSkinAnalysis,
-            //    Permissions.DeleteSkinAnalysis,
-            //    Permissions.CreateDiagnosis,
-            //    Permissions.ViewDiagnosis,
-            //    Permissions.EditDiagnosis,
-            //    Permissions.DeleteDiagnosis,
-            //    Permissions.CreateMedication,
-            //    Permissions.ViewMedication,
-            //    Permissions.EditMedication,
-            //    Permissions.DeleteMedication,
-            //    Permissions.ViewMedicine
-            //});
+            // Assign permissions to Doctor role
+            var doctorRole = await roleManager.FindByNameAsync(ApplicationRoles.Doctor);
+            await AddPermissionsToRole(roleManager, doctorRole, new[]
+            {
+                Permissions.ViewPatient,
+                Permissions.MyAppointments,
+                Permissions.EditAppointment,
+                Permissions.CreatePatientHistory,
+                Permissions.ViewPatientHistory,
+                Permissions.EditPatientHistory,
+                Permissions.DeletePatientHistory,
+                Permissions.CreateSkinAnalysis,
+                Permissions.ViewSkinAnalysis,
+                Permissions.EditSkinAnalysis,
+                Permissions.DeleteSkinAnalysis,
+                Permissions.CreateDiagnosis,
+                Permissions.ViewDiagnosis,
+                Permissions.EditDiagnosis,
+                Permissions.DeleteDiagnosis,
+                Permissions.CreateMedication,
+                Permissions.ViewMedication,
+                Permissions.EditMedication,
+                Permissions.DeleteMedication,
+                Permissions.ViewMedicine
+            });
 
-            //// Assign permissions to Receptionist role
-            //var receptionistRole = await roleManager.FindByNameAsync(ApplicationRoles.Receptionist);
-            //await AddPermissionsToRole(roleManager, receptionistRole, new[]
-            //{
-            //    Permissions.CreatePatient,
-            //    Permissions.ViewPatient,
-            //    Permissions.EditPatient,
-            //    Permissions.DeletePatient,
-            //    Permissions.CreateAppointment,
-            //    Permissions.ViewAppointment,
-            //    Permissions.EditAppointment,
-            //    Permissions.DeleteAppointment
-            //});
+            // Assign permissions to Receptionist role
+            var receptionistRole = await roleManager.FindByNameAsync(ApplicationRoles.Receptionist);
+            await AddPermissionsToRole(roleManager, receptionistRole, new[]
+            {
+                Permissions.CreatePatient,
+                Permissions.ViewPatient,
+                Permissions.EditPatient,
+                Permissions.DeletePatient,
+                Permissions.CreateAppointment,
+                Permissions.ViewAppointment,
+                Permissions.EditAppointment,
+                Permissions.DeleteAppointment
+            });
 
-            //// Assign permissions to Pharmacist role
-            //var pharmacistRole = await roleManager.FindByNameAsync(ApplicationRoles.Pharmacist);
-            //await AddPermissionsToRole(roleManager, pharmacistRole, new[]
-            //{
-            //    Permissions.ViewPatient,
-            //    Permissions.ViewAppointment,
-            //    Permissions.ViewMedication,
-            //    Permissions.CreateMedicine,
-            //    Permissions.ViewMedicine,
-            //    Permissions.EditMedicine,
-            //    Permissions.DeleteMedicine
-            //});
+            // Assign permissions to Pharmacist role
+            var pharmacistRole = await roleManager.FindByNameAsync(ApplicationRoles.Pharmacist);
+            await AddPermissionsToRole(roleManager, pharmacistRole, new[]
+            {
+                Permissions.ViewPatient,
+                Permissions.ViewAppointment,
+                Permissions.ViewMedication,
+                Permissions.CreateMedicine,
+                Permissions.ViewMedicine,
+                Permissions.EditMedicine,
+                Permissions.DeleteMedicine
+            });
         }
 
         private static async Task AddPermissionsToRole(RoleManager<IdentityRole> roleManager, IdentityRole role, string[] permissions)
@@ -159,7 +187,7 @@ namespace Hospital.Infrastructure.Data.Seeders
                 // Create admin Identity user
                 adminUser = new User
                 {
-                    UserName = adminEmail,
+                    UserName = "1234567890",
                     Email = adminEmail,
                     EmailConfirmed = true,
                     PhoneNumber = "1234567890",

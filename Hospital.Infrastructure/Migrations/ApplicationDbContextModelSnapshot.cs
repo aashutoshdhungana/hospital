@@ -22,6 +22,48 @@ namespace Hospital.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentDiagnosis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApointmentInfoId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DiagnosisInfoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApointmentInfoId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DiagnosisInfoId");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("AppointmentDiagnosis");
+                });
+
             modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", b =>
                 {
                     b.Property<int>("Id")
@@ -91,10 +133,6 @@ namespace Hospital.Infrastructure.Migrations
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Diagnosis")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("HistoryOfIllness")
                         .IsRequired()
@@ -252,6 +290,42 @@ namespace Hospital.Infrastructure.Migrations
                     b.ToTable("SkinAnalysisTypes");
                 });
 
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Diagnosis.DiagnosisInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DiagnosisText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UpdatedBy");
+
+                    b.ToTable("DiagnosisInfo");
+                });
+
             modelBuilder.Entity("Hospital.Domain.Aggregates.Doctor.DoctorInfo", b =>
                 {
                     b.Property<int>("Id")
@@ -360,6 +434,9 @@ namespace Hospital.Infrastructure.Migrations
                     b.Property<int>("CreatedBy")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("DiagnosisId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -380,6 +457,8 @@ namespace Hospital.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
+
+                    b.HasIndex("DiagnosisId");
 
                     b.HasIndex("UpdatedBy");
 
@@ -649,6 +728,40 @@ namespace Hospital.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentDiagnosis", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", "AppointmentInfo")
+                        .WithMany("DiagnosisInfos")
+                        .HasForeignKey("ApointmentInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.Diagnosis.DiagnosisInfo", "DiagnosisInfo")
+                        .WithMany()
+                        .HasForeignKey("DiagnosisInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AppointmentInfo");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("DiagnosisInfo");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
             modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", b =>
                 {
                     b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
@@ -795,6 +908,24 @@ namespace Hospital.Infrastructure.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Diagnosis.DiagnosisInfo", b =>
+                {
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
             modelBuilder.Entity("Hospital.Domain.Aggregates.Doctor.DoctorInfo", b =>
                 {
                     b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "CreatedByUser")
@@ -855,12 +986,19 @@ namespace Hospital.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Hospital.Domain.Aggregates.Diagnosis.DiagnosisInfo", "Diagnosis")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("DiagnosisId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Hospital.Domain.Aggregates.UserInfo.UserInfo", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedBy")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("Diagnosis");
 
                     b.Navigation("UpdatedByUser");
                 });
@@ -978,6 +1116,8 @@ namespace Hospital.Infrastructure.Migrations
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.AppointmentInfo", b =>
                 {
+                    b.Navigation("DiagnosisInfos");
+
                     b.Navigation("MedicalAssesment");
 
                     b.Navigation("MedicationPrescibed");
@@ -988,6 +1128,11 @@ namespace Hospital.Infrastructure.Migrations
             modelBuilder.Entity("Hospital.Domain.Aggregates.Appointment.SkinAnalysisType", b =>
                 {
                     b.Navigation("SkinAnalyses");
+                });
+
+            modelBuilder.Entity("Hospital.Domain.Aggregates.Diagnosis.DiagnosisInfo", b =>
+                {
+                    b.Navigation("Prescriptions");
                 });
 
             modelBuilder.Entity("Hospital.Domain.Aggregates.Patient.PatientInfo", b =>

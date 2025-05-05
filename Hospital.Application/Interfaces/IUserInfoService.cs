@@ -12,5 +12,7 @@ namespace Hospital.Application.Interfaces
         Task<ServiceResult<UserInfoDTO>> Delete(int id);
         Task<PaginatedResult<UserInfoDTO>> GetAll(PaginationParams paginationParams);
         Task<ServiceResult<UserInfoDTO>> GetByUsername(string username);
+        Task<ServiceResult<string>> AddToRole(int userId, string role);
+        Task<ServiceResult<string>> RemoveFromRole(int userId, string role);
     }
 }

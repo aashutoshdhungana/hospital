@@ -1,5 +1,6 @@
 ﻿using Hospital.Application.Interfaces;
 using Hospital.Domain.Aggregates.Appointment;
+using Hospital.Domain.Aggregates.Diagnosis;
 using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
 using Hospital.Domain.Aggregates.Rx;
@@ -41,7 +42,8 @@ public class ApplicationDbContext : IdentityDbContext<User>, IUnitOfWork
     public DbSet<MedicationPrescibed> MedicationPrescibed { get; set; }
     public DbSet<SkinAnalysis> SkinAnalyses { get; set; }
     public DbSet<SkinAnalysisType> SkinAnalysisTypes { get; set; }
-
+    public DbSet<DiagnosisInfo> DiagnosisInfo { get; set; }
+    public DbSet<AppointmentDiagnosis> AppointmentDiagnosis { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly)

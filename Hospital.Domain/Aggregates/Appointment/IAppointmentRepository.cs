@@ -1,4 +1,5 @@
-﻿using Hospital.Domain.Interfaces;
+﻿using Hospital.Domain.Aggregates.Diagnosis;
+using Hospital.Domain.Interfaces;
 using System.Linq.Expressions;
 
 namespace Hospital.Domain.Aggregates.Appointment
@@ -14,6 +15,7 @@ namespace Hospital.Domain.Aggregates.Appointment
         Task<AppointmentInfo?> GetByIdAsync(int id, string[] includes);
 
         Task<MedicalAssesment?> GetAssessmentByAppointmentIdAsync(int appointmentId);
+        Task<IEnumerable<AppointmentDiagnosis>> GetDiagnosisInfosByAppointmentId(int appointmentId);
         Task<IEnumerable<SkinAnalysis>> GetSkinAnalysesByAppointmentIdAsync(int appointmentId);
         Task<IEnumerable<MedicationPrescibed>> GetMedicationsByAppointmentIdAsync(int appointmentId);
         Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes();

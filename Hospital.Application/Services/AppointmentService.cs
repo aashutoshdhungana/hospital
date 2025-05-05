@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Hospital.Application.DTOs.Appointment;
+using Hospital.Application.DTOs.AppointmentDiagnosis;
 using Hospital.Application.DTOs.MedicalAssesment;
 using Hospital.Application.DTOs.MedicationPrescribed;
 using Hospital.Application.DTOs.SkinAnalysis;
@@ -7,6 +8,7 @@ using Hospital.Application.Interfaces;
 using Hospital.Application.Models;
 using Hospital.Application.Models.Appointments;
 using Hospital.Domain.Aggregates.Appointment;
+using Hospital.Domain.Aggregates.Diagnosis;
 using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
 using Mapster;
@@ -20,12 +22,14 @@ namespace Hospital.Application.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IDoctorRepository _doctorRepository;
         private readonly IPatientRepository _patientRepository;
+        private readonly IDiagnosisInfoRepository _diagnosisInfoRepository;
         public AppointmentService(
             IAppointmentRepository appointmentRepository,
             ICurrentUserService currentUserService,
             IValidator<CreateAppointmentDTO> validator,
             IDoctorRepository doctorRepository,
-            IPatientRepository patientRepository
+            IPatientRepository patientRepository,
+            IDiagnosisInfoRepository diagnosisInfoRepository
         )
         {
             _validator = validator;
@@ -33,6 +37,7 @@ namespace Hospital.Application.Services
             _appointmentRepository = appointmentRepository;
             _doctorRepository = doctorRepository;
             _patientRepository = patientRepository;
+            _diagnosisInfoRepository = diagnosisInfoRepository;
         }
 
         public async Task<ServiceResult<string>> AddMedicalAssessmentAsync(int appointmentId, CreateUpdateMedicalAssesmentDTO assessment)
@@ -49,7 +54,6 @@ namespace Hospital.Application.Services
                 appointmentInfo.MedicalAssesment.Update(
                     assessment.ChiefComplaint,
                     assessment.HistoryOfIllness,
-                    assessment.Diagnosis,
                     assessment.Advice,
                     _currentUserService.UserId.Value
                 );
@@ -60,7 +64,6 @@ namespace Hospital.Application.Services
                     appointmentInfo.Id,
                     assessment.ChiefComplaint,
                     assessment.HistoryOfIllness,
-                    assessment.Diagnosis,
                     assessment.Advice,
                     _currentUserService.UserId.Value
                 ));
@@ -301,7 +304,7 @@ namespace Hospital.Application.Services
                 return ServiceResult<string>.Failure("Completed appointment cannot be updated");
             }
 
-            if (appointmentInfo.SkinAnalyses.Any() || appointmentInfo.MedicationPrescibed.Any() || appointmentInfo.MedicalAssesment != null)
+            if (appointmentInfo.SkinAnalyses.Any() || appointmentInfo.MedicationPrescibed.Any() || appointmentInfo.MedicalAssesment != null || appointmentInfo.DiagnosisInfos.Any())
             {
                 return ServiceResult<string>.Failure("Appointment cannot be updated as it contains related data");
             }
@@ -344,6 +347,112 @@ namespace Hospital.Application.Services
         public async Task<IEnumerable<SkinAnalysisType>> GetSkinAnalysisTypes()
         {
             return await _appointmentRepository.GetSkinAnalysisTypes();
+        }
+
+        public async Task<IEnumerable<AppointmentDiagnosisDTO>> GetAppointmentDiagnosis(int appointmentId)
+        {
+            return (await _appointmentRepository.GetDiagnosisInfosByAppointmentId(appointmentId))
+                .Adapt<IEnumerable<AppointmentDiagnosisDTO>>();
+        }
+
+        public async Task<ServiceResult<string>> AddAppointmentDiagnosis(int appointmentId, CreateUpdateAppointmentDiagnosis appointmentDiagnosis)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointment = await _appointmentRepository.GetByIdAsync(appointmentId, ["DiagnosisInfos", "MedicationPrescibed"]);
+            if (appointment == null)
+                return ServiceResult<string>.NotFound();
+
+            var existingDiagnosis = appointment.DiagnosisInfos.FirstOrDefault(x => x.DiagnosisInfoId == appointmentDiagnosis.DiagnosisInfoId);
+            if (existingDiagnosis != null)
+            {
+                return ServiceResult<string>.Failure("Diagnosis already added");
+            }
+
+            var diagnosis = await _diagnosisInfoRepository.GetById(appointmentDiagnosis.DiagnosisInfoId);
+            if (diagnosis == null)
+                return ServiceResult<string>.NotFound();
+
+            var dbEntity = new AppointmentDiagnosis(appointmentId, appointmentDiagnosis.DiagnosisInfoId, appointmentDiagnosis.Remarks, _currentUserService.UserId.Value);
+            dbEntity.DiagnosisInfo = diagnosis;
+            appointment.AddAppointmentDiagnosis(dbEntity);
+            _appointmentRepository.Update(appointment);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess ? ServiceResult<string>.Success("Appointment daignosis added successfully") :
+                ServiceResult<string>.Failure("Failed to add appointment diagnosis");
+        }
+
+        public async Task<ServiceResult<string>> UpdateAppointmentDiagnosis(int appointmentId, int appointmentDiagnosisId, CreateUpdateAppointmentDiagnosis appointmentDiagnosis)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointment = await _appointmentRepository.GetByIdAsync(appointmentId, ["DiagnosisInfos", "MedicationPrescibed"]);
+            if (appointment == null)
+                return ServiceResult<string>.NotFound();
+
+            var existingDiagnosis = appointment.DiagnosisInfos
+                .FirstOrDefault(d => d.Id == appointmentDiagnosisId);
+
+            if (existingDiagnosis == null)
+                return ServiceResult<string>.NotFound();
+
+            var diagnosis = await _diagnosisInfoRepository.GetById(appointmentDiagnosis.DiagnosisInfoId);
+            if (diagnosis == null)
+                return ServiceResult<string>.NotFound();
+
+            if (appointment.DiagnosisInfos.Any(x => x.DiagnosisInfoId == appointmentDiagnosis.DiagnosisInfoId && x.Id != appointmentDiagnosisId))
+            {
+                return ServiceResult<string>.Failure("Daignosis already added");
+            }
+
+            existingDiagnosis.Update(appointmentDiagnosis.DiagnosisInfoId, appointmentDiagnosis.Remarks, _currentUserService.UserId.Value);
+            foreach (var rx in diagnosis.Prescriptions)
+            {
+                if (!appointment.MedicationPrescibed.Any(x => x.RxId == rx.Id))
+                {
+                    appointment.AddMedication(new MedicationPrescibed(
+                        _currentUserService.UserId.Value,
+                        appointment.Id,
+                        rx.Id,
+                        "",
+                        0,
+                        0,
+                        DateTime.UtcNow.Date,
+                        ""
+                    ));
+                }
+            }
+            _appointmentRepository.Update(appointment);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess
+                ? ServiceResult<string>.Success("Appointment diagnosis updated successfully")
+                : ServiceResult<string>.Failure("Failed to update appointment diagnosis");
+        }
+
+
+        public async Task<ServiceResult<string>> RemoveAppointmentDiagnosis(int appointmentId, int appointmentDiagnosisId)
+        {
+            if (!_currentUserService.UserId.HasValue)
+                return ServiceResult<string>.Unauthorized();
+
+            var appointment = await _appointmentRepository.GetByIdAsync(appointmentId, ["DiagnosisInfos", "MedicationPrescibed"]);
+            if (appointment == null)
+                return ServiceResult<string>.NotFound();
+
+            var existingDiagnosis = appointment.DiagnosisInfos
+                .FirstOrDefault(d => d.Id == appointmentDiagnosisId);
+
+            if (existingDiagnosis == null)
+                return ServiceResult<string>.NotFound();
+
+            appointment.RemoveAppointmentDiagnosis(existingDiagnosis);
+            _appointmentRepository.Update(appointment);
+            var isSuccess = await _appointmentRepository.UnitOfWork.CommitAsync();
+            return isSuccess
+                ? ServiceResult<string>.Success("Appointment diagnosis removed successfully")
+                : ServiceResult<string>.Failure("Failed to remove appointment diagnosis");
         }
     }
 }

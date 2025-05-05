@@ -92,5 +92,13 @@ namespace Hospital.Infrastructure.Repositories
         {
             _context.MedicationPrescibed.Remove(medicationPrescibed);
         }
+
+        public async Task<IEnumerable<AppointmentDiagnosis>> GetDiagnosisInfosByAppointmentId(int appointmentId)
+        {
+            return await _context.AppointmentDiagnosis
+                .Include(x => x.DiagnosisInfo)
+                .Where(x => x.ApointmentInfoId == appointmentId)
+                .ToListAsync();
+        }
     }
 }

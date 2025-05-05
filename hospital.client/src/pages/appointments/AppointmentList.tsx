@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import appointmentService from "@/features/Appointment/services/appointmentService";
 import { Button } from "../../components/ui/button";
-import { Calendar, Edit, Eye, Grid, List, Trash } from "lucide-react";
+import { Calendar, Edit, Eye, Grid, List, Pill, Trash } from "lucide-react";
 import { DateRangePicker } from "../../components/ui/date-range-picker";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +15,7 @@ import {
 import { Input } from "../../components/ui/input";
 import { DeleteAppointmentConfirmationModal } from "@/features/Appointment/components/DeleteConfirmationModal";
 import { toast as Toast } from "sonner";
+import ProtectedComponent from "@/components/ProtectedRoute/ProtectedComponent";
 
 interface Appointment {
   id: number;
@@ -153,15 +154,26 @@ const AppointmentList = () => {
         </span>
       </td>
       <td className="whitespace-nowrap px-6 py-4">
-        <Button variant="ghost" size="sm" onClick={() => handleView(appointment.id)}>
-          <Eye className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => handleCreateEdit('edit', appointment.id)}>
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => handleDelete(appointment.id)}>
-          <Trash className="h-4 w-4" />
-        </Button>
+        <ProtectedComponent requiredPermissions={['diagnosis.view']}>
+          <Button variant="ghost" size="sm" onClick={() => handleView(appointment.id)}>
+            <Eye className="h-4 w-4" />
+          </Button>
+        </ProtectedComponent>
+        <ProtectedComponent requiredPermissions={['medication.view']}>
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/appointment/${appointment.id}/prescriptions`)}>
+            <Pill className="h-4 w-4" />
+          </Button>
+        </ProtectedComponent>
+        <ProtectedComponent requiredPermissions={['diagnosis.edit']}>
+          <Button variant="ghost" size="sm" onClick={() => handleCreateEdit('edit', appointment.id)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+        </ProtectedComponent>
+        <ProtectedComponent requiredPermissions={['diagnosis.delete']}>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(appointment.id)}>
+            <Trash className="h-4 w-4" />
+          </Button>
+        </ProtectedComponent>
       </td>
     </tr>
   );

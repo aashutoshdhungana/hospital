@@ -26,6 +26,15 @@ namespace Hospital.Application.Services
             _userIdentityService = userIdentityService;
             _validator = validator;
         }
+
+        public async Task<ServiceResult<string>> AddToRole(int userId, string role)
+        {
+            var userInfo = await _userInfoRepository.GetById(userId);
+            if (userInfo == null)
+                return ServiceResult<string>.NotFound();
+            return await _userIdentityService.AddUserToRole(userInfo.PhoneNumber, role);
+        }
+
         public async Task<ServiceResult<UserInfoDTO>> Create(CreateUserInfoDTO createUserInfoDTO)
         {
             var validationResult = await _validator.ValidateAsync(createUserInfoDTO);
@@ -107,6 +116,14 @@ namespace Hospital.Application.Services
             if (userInfo == null)
                 return ServiceResult<UserInfoDTO>.NotFound();
             return ServiceResult<UserInfoDTO>.Success(userInfo.Adapt<UserInfoDTO>());
+        }
+
+        public async Task<ServiceResult<string>> RemoveFromRole(int userId, string role)
+        {
+            var userInfo = await _userInfoRepository.GetById(userId);
+            if (userInfo == null)
+                return ServiceResult<string>.NotFound();
+            return await _userIdentityService.RemoveUserFromRole(userInfo.PhoneNumber, role);
         }
 
         public async Task<ServiceResult<UserInfoDTO>> Update(int userId, UpdateUserInfoDTO userInfoDTO)

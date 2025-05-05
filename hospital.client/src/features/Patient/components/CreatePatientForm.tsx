@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
 	phoneSchema,
 	createUserSchema,
@@ -35,7 +35,7 @@ export default function CreatePatientForm() {
 			lastName: "",
 			email: "",
 			phoneNumber: "",
-			gender: 0,
+			gender: "",
 			street: "",
 			city: "",
 			state: "",
@@ -63,15 +63,23 @@ export default function CreatePatientForm() {
 				userForm.setValue("phoneNumber", data.phoneNumber);
 				setStep("user");
 			}
-		} catch {
-			userForm.setValue("phoneNumber", data.phoneNumber);
-			setStep("user");
+		} catch(error) {
+			let axiosError = error as AxiosError;
+			if (axiosError.response?.status === 404) {
+				userForm.setValue("phoneNumber", data.phoneNumber);
+				setStep("user");
+			} else {
+				toast.error("An error occurred. Please try again.");
+			}
 		}
 	};
 
 	const createUser = async (data: any) => {
 		try {
-			const res = await axios.post("/api/userInfo", data);
+			const res = await axios.post("/api/userInfo", {
+				...data,
+				gender: parseInt(data.gender)
+			});
 			setUserId(res.data.id);
 			toast.success("User created successfully!");
 			setStep("patient");

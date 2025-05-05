@@ -36,6 +36,7 @@ namespace Hospital.Application.Services
                 rxDTO.Name,
                 rxDTO.Type,
                 rxDTO.Remarks,
+                rxDTO.DiagnosisId,
                 _currentUserService.UserId.Value
                 );
 
@@ -90,6 +91,7 @@ namespace Hospital.Application.Services
                 rxDTO.Name,
                 rxDTO.Type,
                 rxDTO.Remarks,
+                rxDTO.DiagnosisId,
                 _currentUserService.UserId.Value
             );
 

@@ -39,6 +39,8 @@ import { Link } from "react-router-dom";
 import { PaginationResponse } from "@/types/Pagination";
 import Loading from "@/components/Loading/Loading";
 import { DeleteUserConfirmation } from "./DeleteUserConfirmation";
+import { RoleAssignmentPopup } from "./RoleAssignmentPopup";
+import axios from "axios";
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return "-";
@@ -68,6 +70,16 @@ export default function UserDataGrid() {
   const [isDeletePoupOpen, setIsDeletePopupOpen] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState<number>();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [rolePopupOpen, setRolePopupOpen] = useState(false);
+  const [roleActionType, setRoleActionType] = useState<"add" | "remove">("add");
+  const [userForRoleChange, setUserForRoleChange] = useState<UserInfo | null>(null);
+
+  const handleRoleChange = (user: UserInfo, action: "add" | "remove") => {
+    setUserForRoleChange(user);
+    setRoleActionType(action);
+    setRolePopupOpen(true);
+  };
+
 
   const loadData = async () => {
     setIsloading(true);
@@ -226,6 +238,15 @@ export default function UserDataGrid() {
                             Edit
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRoleChange(user, "add")}>
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Add to Role
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRoleChange(user, "remove")}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Remove from Role
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                           onClick={() => handleDelete(user.id)}
                           className="text-red-600"
@@ -281,9 +302,9 @@ export default function UserDataGrid() {
               }
               className={
                 currentPage ===
-                Math.ceil(
-                  (userData?.totalCount ?? 0) / (userData?.pageSize ?? 1)
-                )
+                  Math.ceil(
+                    (userData?.totalCount ?? 0) / (userData?.pageSize ?? 1)
+                  )
                   ? "pointer-events-none opacity-50"
                   : ""
               }
@@ -291,6 +312,41 @@ export default function UserDataGrid() {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+      {userForRoleChange && (
+        <RoleAssignmentPopup
+          isOpen={rolePopupOpen}
+          setIsOpen={setRolePopupOpen}
+          userName={`${userForRoleChange.firstName} ${userForRoleChange.lastName}`}
+          action={roleActionType}
+          onConfirm={async (role) => {
+            try {
+              if (!userForRoleChange) return;
+          
+              const { id } = userForRoleChange;
+          
+              if (roleActionType === "add") {
+                await axios.post(`api/UserInfo/${id}/addToRole/${role}`);
+              } else {
+                await axios.delete(`api/UserInfo/${id}/removeFromRole/${role}`);
+              }
+          
+              toast.success(
+                `${roleActionType === "add" ? "Added" : "Removed"} ${role} role for ${userForRoleChange.firstName}`
+              );
+            } catch (error) {
+              toast.error(
+                `Failed to ${roleActionType === "add" ? "add" : "remove"} ${role} role`
+              );
+            } finally {
+              setRolePopupOpen(false);
+              setUserForRoleChange(null);
+            }
+          }}
+          
+        />
+      )}
+
     </div>
+
   );
 }

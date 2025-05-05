@@ -71,14 +71,16 @@ namespace Hospital.Server.Controllers
         [CheckPermission(Permissions.EditUser)]
         public async Task<ActionResult> AddToRole(int id, string role)
         {
-            return Ok();
+            var result = await _userInfoService.AddToRole(id, role);
+            return HandleServiceResult(result);
         }
 
         [HttpDelete("{id}/removeFromRole/{role}")]
         [CheckPermission(Permissions.EditUser)]
         public async Task<ActionResult> RemoveFromRole(int id, string role)
         {
-            return Ok();
+            var result = await _userInfoService.RemoveFromRole(id, role);
+            return HandleServiceResult(result);
         }
     }
 }

@@ -4,7 +4,17 @@ namespace Hospital.Domain.Aggregates.Appointment
 {
     public class SkinAnalysisType : AuditedEntity<int>
     {
-        public string Name { get; set; }
+        public SkinAnalysisType()
+        {
+            
+        }
+
+        public SkinAnalysisType(string name, int createdBy) : base(createdBy)
+        {
+            Name = name;
+        }
+
+        public string Name { get; private set; }
         public readonly List<SkinAnalysis> SkinAnalyses = new List<SkinAnalysis>();
     }
 }

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Gender } from "./UserInfo";
 
 export const UserInfoValidationSchema = z.object({
 	email: z.string().email("Email address is invalid")
@@ -15,7 +14,7 @@ export const UserInfoValidationSchema = z.object({
 	phoneNumber: z.string()
 		.min(1, "Required")
 		.regex(/^\+?[0-9]{7,15}$/, "Invalid phone number format"),
-	gender: z.nativeEnum(Gender, { errorMap: () => ({ message: "Invalid gender selection" }) }),
+	gender: z.string(),
 	street: z.string()
         .max(100, "Street name cannot exceed 100 characters") 
         .optional(),

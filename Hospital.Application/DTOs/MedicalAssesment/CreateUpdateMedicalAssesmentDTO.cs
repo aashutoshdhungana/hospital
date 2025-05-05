@@ -4,7 +4,6 @@
     {
         public string ChiefComplaint { get; set; }
         public string HistoryOfIllness { get; set; }
-        public string Diagnosis { get; set; }
         public string Advice { get; set; }
     }
 }

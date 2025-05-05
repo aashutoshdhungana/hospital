@@ -1,4 +1,6 @@
-﻿using Hospital.Domain.BaseEntities;
+﻿using Hospital.Domain.Aggregates.Diagnosis;
+using Hospital.Domain.Aggregates.Rx;
+using Hospital.Domain.BaseEntities;
 using Hospital.Domain.Interfaces;
 
 namespace Hospital.Domain.Aggregates.Appointment
@@ -28,6 +30,9 @@ namespace Hospital.Domain.Aggregates.Appointment
         private readonly List<SkinAnalysis> _skinAnalyses = new();
         public IReadOnlyCollection<MedicationPrescibed> MedicationPrescibed => _medicationPrescribed;
         private readonly List<MedicationPrescibed> _medicationPrescribed = new();
+
+        public IReadOnlyCollection<AppointmentDiagnosis> DiagnosisInfos => _diagnosisInfos;
+        private readonly List<AppointmentDiagnosis> _diagnosisInfos = new();
         public Patient.PatientInfo? PatientInfo { get; private set; }
         public Doctor.DoctorInfo? DoctorInfo { get; private set; }
 
@@ -67,6 +72,32 @@ namespace Hospital.Domain.Aggregates.Appointment
         public void SetMedicalAssessment(MedicalAssesment assessment)
         {
             MedicalAssesment = assessment;
+        }
+
+        public void AddAppointmentDiagnosis(AppointmentDiagnosis appointmentDiagnosis)
+        {
+            _diagnosisInfos.Add(appointmentDiagnosis);
+            foreach (var rx in appointmentDiagnosis?.DiagnosisInfo?.Prescriptions ?? new List<RxInfo>())
+            {
+                if (!_medicationPrescribed.Any(x => x.RxId == rx.Id))
+                {
+                    _medicationPrescribed.Add(new MedicationPrescibed(
+                        appointmentDiagnosis?.CreatedBy ?? 0,
+                        Id,
+                        rx.Id,
+                        "",
+                        0,
+                        0,
+                        DateTime.UtcNow.Date,
+                        ""
+                   ));
+                }
+            }
+        }
+
+        public void RemoveAppointmentDiagnosis(AppointmentDiagnosis appointmentDiagnosis)
+        {
+            _diagnosisInfos.Remove(appointmentDiagnosis);
         }
 
         public void Reschedule(DateTime newDate)

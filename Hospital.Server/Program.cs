@@ -5,10 +5,12 @@ using Hospital.Application.Interfaces;
 using Hospital.Application.MapsterConfig;
 using Hospital.Application.Services;
 using Hospital.Domain.Aggregates.Appointment;
+using Hospital.Domain.Aggregates.Diagnosis;
 using Hospital.Domain.Aggregates.Doctor;
 using Hospital.Domain.Aggregates.Patient;
 using Hospital.Domain.Aggregates.Rx;
 using Hospital.Domain.Aggregates.UserInfo;
+using Hospital.Domain.Interfaces;
 using Hospital.Infrastructure.Data;
 using Hospital.Infrastructure.Data.Seeders;
 using Hospital.Infrastructure.Identity;
@@ -125,6 +127,8 @@ namespace Hospital.Server
             builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
             builder.Services.AddScoped<IRxRepository, RxRepository>();
             builder.Services.AddScoped<IRxInfoService, RxInfoService>();
+            builder.Services.AddScoped<IDiagnosisInfoRepository, DiagnosisInfoRepository>();
+            builder.Services.AddScoped<IDiagnosisService, DiagnosisService>();
             builder.Services.AddHttpContextAccessor();
             return builder;
         }

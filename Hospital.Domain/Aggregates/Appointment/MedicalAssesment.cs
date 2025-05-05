@@ -6,7 +6,6 @@ namespace Hospital.Domain.Aggregates.Appointment
     {
         public string ChiefComplaint { get; private set; }
         public string HistoryOfIllness { get; private set; }
-        public string Diagnosis { get; private set; }
         public string Advice { get; private set; }
         public int AppointmentInfoId {  get; private set; }
         public AppointmentInfo? AppointmentInfo { get; private set; }
@@ -16,7 +15,6 @@ namespace Hospital.Domain.Aggregates.Appointment
             int appointmentInfoId,
             string chiefComplaint,
             string historyOfIllness,
-            string diagnosis,
             string advice,
             int createdBy
         ) : base(createdBy)
@@ -24,21 +22,18 @@ namespace Hospital.Domain.Aggregates.Appointment
             AppointmentInfoId = appointmentInfoId;
             ChiefComplaint = chiefComplaint;
             HistoryOfIllness = historyOfIllness;
-            Diagnosis = diagnosis;
             Advice = advice;
         }
 
         public void Update(
             string chiefComplaint,
             string historyOfIllness,
-            string diagnosis,
             string advice,
             int updatedBy
             )
         {
             ChiefComplaint = chiefComplaint;
             HistoryOfIllness = historyOfIllness;
-            Diagnosis = diagnosis;
             Advice = advice;
             Updated(updatedBy);
         }

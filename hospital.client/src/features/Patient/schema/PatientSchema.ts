@@ -16,7 +16,7 @@ export const createUserSchema = z.object({
 	lastName: z.string().min(1),
 	email: z.string().email(),
 	phoneNumber: z.string().min(10),
-	gender: z.nativeEnum(Gender, { errorMap: () => ({ message: "Invalid gender selection" }) }),
+	gender: z.string().min(1),
 	street: z.string(),
 	city: z.string(),
 	state: z.string(),

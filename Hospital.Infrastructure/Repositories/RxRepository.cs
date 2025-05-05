@@ -27,6 +27,7 @@ namespace Hospital.Infrastructure.Repositories
         public async Task<RxInfo?> Get(int id)
         {
             return await _context.RxInfos
+                .Include(x => x.Diagnosis)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.UpdatedByUser)
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -35,6 +36,7 @@ namespace Hospital.Infrastructure.Repositories
         public async Task<IEnumerable<RxInfo>> GetAll()
         {
             return await _context.RxInfos
+                .Include(x => x.Diagnosis)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.UpdatedByUser)
                 .ToListAsync();

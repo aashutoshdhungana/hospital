@@ -55,7 +55,7 @@ const UserForm : React.FC<UserFormProps> = ({ id }) => {
             middleName: undefined,
             lastName: '',
             phoneNumber: '',
-            gender: Gender.Male,
+            gender: "0",
             street: undefined,
             city: undefined,
             state: undefined,
@@ -69,6 +69,7 @@ const UserForm : React.FC<UserFormProps> = ({ id }) => {
             let data = await userInfoService.getUserById(id);
             form.reset({
                 ...data,
+                gender: data.gender.toString(),
                 dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split("T")[0] : ""
             })
         } catch (error) {

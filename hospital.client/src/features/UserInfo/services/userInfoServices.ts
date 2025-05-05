@@ -35,6 +35,7 @@ const userInfoService = {
             const response = await axios
             .post('/api/UserInfo', {
                 ...userInfo,
+                gender: parseInt(userInfo.gender)
             });
             return response.data;
         } catch (error) {

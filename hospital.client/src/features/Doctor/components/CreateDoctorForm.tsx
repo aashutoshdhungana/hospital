@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { phoneSchema, createUserSchema, doctorSchema, Gender, Specialization } from "../schemas/CreateDoctorSchema";
+import axios, { AxiosError } from "axios";
+import { phoneSchema, createUserSchema, doctorSchema, Gender } from "../schemas/CreateDoctorSchema";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 export default function CreateDoctorForm() {
 	const [step, setStep] = useState<"phone" | "user" | "doctor">("phone");
 	const [userId, setUserId] = useState<number | null>(null);
-	
+
 	const navigate = useNavigate();
 
 	const phoneForm = useForm({
@@ -31,7 +31,7 @@ export default function CreateDoctorForm() {
 			lastName: "",
 			email: "",
 			phoneNumber: "",
-			gender: 0,
+			gender: "",
 			street: "",
 			city: "",
 			state: "",
@@ -45,7 +45,7 @@ export default function CreateDoctorForm() {
 		defaultValues: {
 			medicalLicenseNumber: "",
 			pastExperienceInYears: 0,
-			specialization: Specialization.Anesthesiologist,
+			specialization: "0",
 		},
 	});
 
@@ -61,15 +61,24 @@ export default function CreateDoctorForm() {
 				userForm.setValue("phoneNumber", data.phoneNumber);
 				setStep("user");
 			}
-		} catch {
-			userForm.setValue("phoneNumber", data.phoneNumber);
-			toast.error("Error! Please try again.");
+		} catch (error) {
+			let axiosError = error as AxiosError;
+			if (axiosError.response?.status === 404) {
+				userForm.setValue("phoneNumber", data.phoneNumber);
+				setStep("user");
+			}
+			else {
+				toast.error("Error! Please try again.");
+			}
 		}
 	};
 
 	const createUser = async (data: any) => {
 		try {
-			const res = await axios.post("/api/userInfo", data);
+			const res = await axios.post("/api/userInfo", {
+				...data,
+				gender: parseInt(data.gender)
+			});
 			setUserId(res.data.id);
 			setStep("doctor");
 			toast.success("User created successfully!");
@@ -81,7 +90,7 @@ export default function CreateDoctorForm() {
 	const createDoctor = async (data: any) => {
 		if (!userId) return;
 		try {
-			await axios.post("/api/userInfo", { ...data, id: userId });
+			await axios.post("/api/doctor", { ...data, userInfoId: userId, specialization: parseInt(data.specialization) });
 			toast.success("Doctor profile created successfully!");
 			navigate("/doctors");
 		} catch (error) {
@@ -114,98 +123,143 @@ export default function CreateDoctorForm() {
 
 			{step === "user" && (
 				<Form {...userForm}>
-					<form onSubmit={userForm.handleSubmit(createUser)} className="space-y-4">
-						<FormField name="firstName" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>First Name</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="middleName" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Middle Name</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="lastName" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Last Name</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="email" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Email</FormLabel>
-								<FormControl><Input type="email" {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="phoneNumber" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Phone Number</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="gender" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Gender</FormLabel>
-								<FormControl>
-									<Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
-										<SelectTrigger><SelectValue /></SelectTrigger>
+					<form onSubmit={userForm.handleSubmit(createUser)} className="space-y-6">
+						{/* Name Fields */}
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<FormField name="firstName" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>First Name</FormLabel>
+									<FormControl>
+										<Input placeholder="First name" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+							<FormField name="middleName" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Middle Name (Optional)</FormLabel>
+									<FormControl>
+										<Input placeholder="Middle name" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+							<FormField name="lastName" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Last Name</FormLabel>
+									<FormControl>
+										<Input placeholder="Last name" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+						</div>
+
+						{/* Contact Fields */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<FormField name="email" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Email Address</FormLabel>
+									<FormControl>
+										<Input type="email" placeholder="Email" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+							<FormField name="phoneNumber" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone Number</FormLabel>
+									<FormControl>
+										<Input placeholder="Phone number" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+						</div>
+
+						{/* Gender and Date of Birth */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<FormField name="gender" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Gender</FormLabel>
+									<Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+										<FormControl>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Select gender" />
+											</SelectTrigger>
+										</FormControl>
 										<SelectContent>
 											<SelectItem value={Gender.Male.toString()}>Male</SelectItem>
 											<SelectItem value={Gender.Female.toString()}>Female</SelectItem>
 											<SelectItem value={Gender.Other.toString()}>Other</SelectItem>
 										</SelectContent>
 									</Select>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="street" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Street</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="city" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>City</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="state" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>State</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="country" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Country</FormLabel>
-								<FormControl><Input {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<FormField name="dateOfBirth" control={userForm.control} render={({ field }) => (
-							<FormItem>
-								<FormLabel>Date of Birth</FormLabel>
-								<FormControl><Input type="date" {...field} /></FormControl>
-								<FormMessage />
-							</FormItem>
-						)} />
-						<Button type="submit">Create User</Button>
+									<FormMessage />
+								</FormItem>
+							)} />
+
+							<FormField name="dateOfBirth" control={userForm.control} render={({ field }) => (
+								<FormItem className="flex flex-col">
+									<FormLabel>Date of Birth</FormLabel>
+									<FormControl>
+										<Input type="date" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+						</div>
+
+						{/* Address Fields */}
+						<div className="space-y-4">
+							<h2 className="text-lg font-semibold">Address Information</h2>
+
+							<FormField name="street" control={userForm.control} render={({ field }) => (
+								<FormItem>
+									<FormLabel>Street Address</FormLabel>
+									<FormControl>
+										<Input placeholder="Street address" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)} />
+
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<FormField name="city" control={userForm.control} render={({ field }) => (
+									<FormItem>
+										<FormLabel>City</FormLabel>
+										<FormControl>
+											<Input placeholder="City" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)} />
+								<FormField name="state" control={userForm.control} render={({ field }) => (
+									<FormItem>
+										<FormLabel>State/Province</FormLabel>
+										<FormControl>
+											<Input placeholder="State" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)} />
+								<FormField name="country" control={userForm.control} render={({ field }) => (
+									<FormItem>
+										<FormLabel>Country</FormLabel>
+										<FormControl>
+											<Input placeholder="Country" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)} />
+							</div>
+						</div>
+
+						<Button type="submit" className="w-full">
+							Create User
+						</Button>
 					</form>
 				</Form>
 			)}
-
 			{step === "doctor" && (
 				<Form {...doctorForm}>
 					<form onSubmit={doctorForm.handleSubmit(createDoctor)} className="space-y-4">
@@ -227,14 +281,14 @@ export default function CreateDoctorForm() {
 							<FormItem>
 								<FormLabel>Specialization</FormLabel>
 								<FormControl>
-								<Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
-										<SelectTrigger><SelectValue /></SelectTrigger>
+									<Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+										<SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
 										<SelectContent>
-										{specializations.map((spec) => (
-											<SelectItem key={spec.value} value={spec.value.toString()}>
-												{spec.label}
-											</SelectItem>
-										))}
+											{specializations.map((spec) => (
+												<SelectItem key={spec.value} value={spec.value.toString()}>
+													{spec.label}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
 								</FormControl>

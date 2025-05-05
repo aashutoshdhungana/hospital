@@ -17,7 +17,7 @@ const LoginForm = () => {
 
   // Credentials to copy
   const credentials = [
-    { label: "Email", value: "admin@hospital.com" },
+    { label: "Phone", value: "1234567890" },
     { label: "Password", value: "Admin@123456" }
   ];
 

@@ -4,6 +4,7 @@ import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoutes";
 import Layout from "../components/layouts/Layout";
 import NotFound from "../pages/NotFound";
 import Unauthorized from "../pages/Unauthorized";
+import AppointmentPrescriptions from "@/pages/appointments/AppointmentPrescriptions";
 
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const AllPatients = lazy(() => import('../pages/patients/List'));
@@ -23,6 +24,10 @@ const AllDoctors = lazy(() => import('../pages/doctors/List'));
 const CreateUser = lazy(() => import('../pages/userInfo/Create'));
 const EditUser = lazy(() => import('../pages/userInfo/Edit'));
 const AllUsers = lazy(() => import('../pages/userInfo/List'));
+const CreateDiagnosis = lazy(() => import('../pages/diagnosis/Create'));
+const EditDiagnosis = lazy(() => import('../pages/diagnosis/Edit'));
+const AllDiagnosis = lazy(() => import('../pages/diagnosis/List'));
+
 const RouteConfig: RouteObject[] = [
     {
         path: '/login',
@@ -83,6 +88,11 @@ const RouteConfig: RouteObject[] = [
                         children: [{index: true, element: <DetailForm />}],
                     },
                     {
+                        path: '/appointment/:id/prescriptions',
+                        element: <ProtectedRoute requiredPermissions={['medication.view']} />,
+                        children: [{index: true, element: <AppointmentPrescriptions />}],
+                    },
+                    {
                         path: '/appointment/edit/:id',
                         element: <ProtectedRoute requiredPermissions={['appointments.edit']} />,
                         children: [{index: true, element: <EditAppointment />}],
@@ -131,6 +141,21 @@ const RouteConfig: RouteObject[] = [
                         path: '/user/new',
                         element: <ProtectedRoute requiredPermissions={['users.create']} />,
                         children: [{ index: true, element: <CreateUser />}]
+                    },
+                    {
+                        path: '/diagnosis/new',
+                        element: <ProtectedRoute requiredPermissions={['diagnosis.create']} />,
+                        children: [{ index: true, element: <CreateDiagnosis />}]
+                    },
+                    {
+                        path: '/diagnosis/edit/:id',
+                        element: <ProtectedRoute requiredPermissions={['diagnosis.edit']} />,
+                        children: [{ index: true, element: <EditDiagnosis />}]
+                    },
+                    {
+                        path: '/diagnosis',
+                        element: <ProtectedRoute requiredPermissions={['diagnosis.view']} />,
+                        children: [{ index: true, element: <AllDiagnosis />}]
                     }
                 ]
             }
